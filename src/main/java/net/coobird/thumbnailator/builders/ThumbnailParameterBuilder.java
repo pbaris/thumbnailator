@@ -1,17 +1,17 @@
 package net.coobird.thumbnailator.builders;
 
-import java.awt.Dimension;
+import net.coobird.thumbnailator.ThumbnailParameter;
+import net.coobird.thumbnailator.filters.ImageFilter;
+import net.coobird.thumbnailator.geometry.Region;
+import net.coobird.thumbnailator.resizers.DefaultResizerFactory;
+import net.coobird.thumbnailator.resizers.FixedResizerFactory;
+import net.coobird.thumbnailator.resizers.Resizer;
+import net.coobird.thumbnailator.resizers.ResizerFactory;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
-
-import net.coobird.thumbnailator.ThumbnailParameter;
-import net.coobird.thumbnailator.filters.ImageFilter;
-import net.coobird.thumbnailator.resizers.DefaultResizerFactory;
-import net.coobird.thumbnailator.resizers.FixedResizerFactory;
-import net.coobird.thumbnailator.geometry.Region;
-import net.coobird.thumbnailator.resizers.Resizer;
-import net.coobird.thumbnailator.resizers.ResizerFactory;
 
 /**
  * A builder for generating {@link ThumbnailParameter}.
@@ -51,14 +51,14 @@ import net.coobird.thumbnailator.resizers.ResizerFactory;
  * <dt>use of Exif metadata for orientation</dt>
  * <dd>Use the Exif metadata to determine the orientation of the thumbnail.</dd>
  * </dl>
- * 
+ *
  * @author coobird
  *
  */
 public final class ThumbnailParameterBuilder
 {
 	private static final int UNINITIALIZED = -1;
-	
+
 	private int width = UNINITIALIZED;
 	private int height = UNINITIALIZED;
 	private double widthScalingFactor = Double.NaN;
@@ -73,17 +73,19 @@ public final class ThumbnailParameterBuilder
 	private Region sourceRegion = null;
 	private boolean fitWithinDimensions = true;
 	private boolean useExifOrientation = true;
-	
+    private boolean useFrame = false;
+    private Color frameColor = Color.WHITE;
+
 	/**
 	 * Creates an instance of a {@link ThumbnailParameterBuilder}.
 	 */
 	public ThumbnailParameterBuilder()
 	{
 	}
-	
+
 	/**
 	 * Sets the image type fo the thumbnail.
-	 * 
+	 *
 	 * @param type			The image type of the thumbnail.
 	 * @return				A reference to this object.
 	 */
@@ -92,10 +94,10 @@ public final class ThumbnailParameterBuilder
 		imageType = type;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the size of the thumbnail.
-	 * 
+	 *
 	 * @param size		The dimensions of the thumbnail.
 	 * @return			A reference to this object.
 	 */
@@ -104,10 +106,10 @@ public final class ThumbnailParameterBuilder
 		size(size.width, size.height);
 		return this;
 	}
-	
+
 	/**
 	 * Sets the size of the thumbnail.
-	 * 
+	 *
 	 * @param width		The width of the thumbnail.
 	 * @param height	The height of the thumbnail.
 	 * @return			A reference to this object.
@@ -123,15 +125,15 @@ public final class ThumbnailParameterBuilder
 		{
 			throw new IllegalArgumentException("Height must be greater than 0.");
 		}
-		
+
 		this.width = width;
 		this.height = height;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the scaling factor of the thumbnail.
-	 * 
+	 *
 	 * @param scalingFactor		The scaling factor of the thumbnail.
 	 * @return					A reference to this object.
 	 * @throws IllegalArgumentException		If the scaling factor is not a
@@ -142,10 +144,10 @@ public final class ThumbnailParameterBuilder
 	{
 		return scale(scalingFactor, scalingFactor);
 	}
-	
+
 	/**
 	 * Sets the scaling factor of the thumbnail.
-	 * 
+	 *
 	 * @param widthScalingFactor		The scaling factor to use for the width
 	 * 									when creating the thumbnail.
 	 * @param heightScalingFactor		The scaling factor to use for the height
@@ -170,15 +172,15 @@ public final class ThumbnailParameterBuilder
 		{
 			throw new IllegalArgumentException("Scaling factor must be a rational number.");
 		}
-		
+
 		this.widthScalingFactor = widthScalingFactor;
 		this.heightScalingFactor = heightScalingFactor;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the region of the source image to use when creating a thumbnail.
-	 * 
+	 *
 	 * @param sourceRegion		The region of the source image to use when
 	 * 							creating a thumbnail.
 	 * @return			A reference to this object.
@@ -189,11 +191,11 @@ public final class ThumbnailParameterBuilder
 		this.sourceRegion = sourceRegion;
 		return this;
 	}
-	
+
 	/**
 	 * Sets whether or not the thumbnail is to maintain the aspect ratio of
 	 * the original image.
-	 * 
+	 *
 	 * @param keep		{@code true} if the aspect ratio of the original image
 	 * 					is to be maintained in the thumbnail, {@code false}
 	 * 					otherwise.
@@ -204,7 +206,7 @@ public final class ThumbnailParameterBuilder
 		this.keepAspectRatio = keep;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the compression quality setting of the thumbnail.
 	 * <p>
@@ -214,7 +216,7 @@ public final class ThumbnailParameterBuilder
 	 * <p>
 	 * If the default compression quality is to be used, then the value
 	 * {@link ThumbnailParameter#DEFAULT_QUALITY} should be used.
-	 * 
+	 *
 	 * @param quality		The compression quality setting of the thumbnail.
 	 * @return				A reference to this object.
 	 */
@@ -226,7 +228,7 @@ public final class ThumbnailParameterBuilder
 
 	/**
 	 * Sets the output format of the thumbnail.
-	 * 
+	 *
 	 * @param format		The output format of the thumbnail.
 	 * @return				A reference to this object.
 	 */
@@ -235,10 +237,10 @@ public final class ThumbnailParameterBuilder
 		this.thumbnailFormat = format;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the output format type of the thumbnail.
-	 * 
+	 *
 	 * @param formatType	The output format type of the thumbnail.
 	 * @return				A reference to this object.
 	 */
@@ -247,12 +249,12 @@ public final class ThumbnailParameterBuilder
 		this.thumbnailFormatType = formatType;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the {@link ImageFilter}s to apply to the thumbnail.
 	 * <p>
 	 * These filters will be applied after the original image is resized.
-	 * 
+	 *
 	 * @param filters		The output format type of the thumbnail.
 	 * @return				A reference to this object.
 	 */
@@ -262,11 +264,11 @@ public final class ThumbnailParameterBuilder
 		{
 			throw new NullPointerException("Filters is null.");
 		}
-		
+
 		this.filters = filters;
 		return this;
 	}
-	
+
 	/**
 	 * Sets the {@link Resizer} to use when performing the resizing operation
 	 * to create the thumbnail.
@@ -285,11 +287,11 @@ public final class ThumbnailParameterBuilder
 		{
 			throw new NullPointerException("Resizer is null.");
 		}
-		
+
 		this.resizerFactory = new FixedResizerFactory(resizer);
 		return this;
 	}
-	
+
 	/**
 	 * Sets the {@link ResizerFactory} to use to obtain a {@link Resizer} when
 	 * performing the resizing operation to create the thumbnail.
@@ -297,8 +299,8 @@ public final class ThumbnailParameterBuilder
 	 * Calling this method after {@link #resizer(Resizer)} could result in
 	 * {@link Resizer}s not specified in the {@code resizer} method to be used
 	 * when creating thumbnails.
-	 * 
-	 * 
+	 *
+	 *
 	 * @param resizerFactory	The {@link ResizerFactory} to use when obtaining
 	 * 							a {@link Resizer} to create the thumbnail.
 	 * @return					A reference to this object.
@@ -310,15 +312,15 @@ public final class ThumbnailParameterBuilder
 		{
 			throw new NullPointerException("Resizer is null.");
 		}
-		
+
 		this.resizerFactory = resizerFactory;
 		return this;
 	}
-	
+
 	/**
 	 * Sets whether or not the thumbnail should fit within the specified
 	 * dimensions.
-	 * 
+	 *
 	 * @param fit		{@code true} if the thumbnail should be sized to fit
 	 *					within the specified dimensions, if the thumbnail
 	 * 					is going to exceed those dimensions.
@@ -330,11 +332,11 @@ public final class ThumbnailParameterBuilder
 		this.fitWithinDimensions = fit;
 		return this;
 	}
-	
+
 	/**
 	 * Sets whether or not the Exif metadata should be used to determine the
 	 * orientation of the thumbnail.
-	 * 
+	 *
 	 * @param use		{@code true} if the Exif metadata should be used
 	 * 					to determine the orientation of the thumbnail,
 	 * 					{@code false} otherwise.
@@ -347,13 +349,19 @@ public final class ThumbnailParameterBuilder
 		return this;
 	}
 
+    public ThumbnailParameterBuilder useFrame(boolean use)
+    {
+        this.useFrame = use;
+        return this;
+    }
+
 	/**
 	 * Returns a {@link ThumbnailParameter} from the parameters which are
 	 * currently set.
 	 * <p>
 	 * This method will throw a {@link IllegalArgumentException} required
 	 * parameters for the {@link ThumbnailParameter} have not been set.
-	 * 
+	 *
 	 * @return		A {@link ThumbnailParameter} with parameters set through
 	 * 				the use of this builder.
 	 * @throws IllegalStateException	If neither the size nor the scaling
@@ -376,9 +384,11 @@ public final class ThumbnailParameterBuilder
 					filters,
 					resizerFactory,
 					fitWithinDimensions,
-					useExifOrientation
+					useExifOrientation,
+                    useFrame,
+                    frameColor
 			);
-			
+
 		}
 		else if (width != UNINITIALIZED && height != UNINITIALIZED)
 		{
@@ -393,7 +403,9 @@ public final class ThumbnailParameterBuilder
 					filters,
 					resizerFactory,
 					fitWithinDimensions,
-					useExifOrientation
+					useExifOrientation,
+                    useFrame,
+                    frameColor
 			);
 		}
 		else

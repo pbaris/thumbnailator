@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.coobird</groupId>
   <artifactId>thumbnailator</artifactId>
-  <version>0.4.8</version>
+  <version>0.4.9</version>
   <packaging>jar</packaging>
   <name>thumbnailator</name>
   <description>Thumbnailator - a thumbnail generation library for Java</description>
@@ -48,6 +48,7 @@
           <debuglevel>lines</debuglevel>
         </configuration>
       </plugin>
+        <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -98,6 +99,7 @@
           <excludeResources>false</excludeResources>
         </configuration>
       </plugin>
+        -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
@@ -124,6 +126,7 @@
           </execution>
         </executions>
       </plugin>
+        <!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
@@ -138,6 +141,7 @@
           </execution>
         </executions>
       </plugin>
+      -->
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>

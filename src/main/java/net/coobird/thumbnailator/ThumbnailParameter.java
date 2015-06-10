@@ -1,6 +1,6 @@
 package net.coobird.thumbnailator;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import net.coobird.thumbnailator.resizers.ResizerFactory;
  * An instance of {@link ThumbnailParameter} is mutable -- it should not be
  * reused for multiple resizes, as the parameters can change behind the scenes
  * as the resizing process progresses.
- * 
+ *
  * @author coobird
  *
  */
@@ -38,31 +38,31 @@ public class ThumbnailParameter
 	 * should behave as if {@link #ORIGINAL_FORMAT} was specified.
 	 */
 	public static final String DETERMINE_FORMAT = "\0";
-	
+
 	/**
 	 * A constant used to denote that the output format type of the thumbnail
 	 * should be the default type of the codec being used.
 	 */
 	public static final String DEFAULT_FORMAT_TYPE = null;
-	
+
 	/**
 	 * A constant used to denote that the default compression quality settings
 	 * should be used when creating the thumbnail.
 	 */
 	public static final float DEFAULT_QUALITY = Float.NaN;
-	
+
 	/**
 	 * A constant used to denote that the image type of the original image
 	 * should be used when creating the thumbnail.
 	 */
 	public static final int ORIGINAL_IMAGE_TYPE = -1;
-	
+
 	/**
 	 * A constant used to denote that the default image type should be used
 	 * when creating the thumbnail.
 	 */
 	public static final int DEFAULT_IMAGE_TYPE = BufferedImage.TYPE_INT_ARGB;
-	
+
 	/**
 	 * The thumbnail size.
 	 * <p>
@@ -70,7 +70,7 @@ public class ThumbnailParameter
 	 * as {@link Double#NaN} to indicate that it is not set.
 	 */
 	private final Dimension thumbnailSize;
-	
+
 	/**
 	 * The scaling factor to apply to the width when creating a thumbnail from
 	 * the original image.
@@ -79,7 +79,7 @@ public class ThumbnailParameter
 	 * as {@code null} to indicate that it is not set.
 	 */
 	private final double widthScalingFactor;
-	
+
 	/**
 	 * The scaling factor to apply to the height when creating a thumbnail from
 	 * the original image.
@@ -88,7 +88,7 @@ public class ThumbnailParameter
 	 * as {@code null} to indicate that it is not set.
 	 */
 	private final double heightScalingFactor;
-	
+
 	/**
 	 * Indicated whether or not the thumbnail should retain the aspect ratio
 	 * the same as the original image when the aspect ratio of the desired
@@ -96,7 +96,7 @@ public class ThumbnailParameter
 	 * image.
 	 */
 	private final boolean keepAspectRatio;
-	
+
 	/**
 	 * The output format for the thumbnail.
 	 * <p>
@@ -108,7 +108,7 @@ public class ThumbnailParameter
 	 * information available, such as the output file name of the thumbnail.
 	 */
 	private final String outputFormat;
-	
+
 	/**
 	 * The output format type for the thumbnail.
 	 * <p>
@@ -117,7 +117,7 @@ public class ThumbnailParameter
 	 * as the output format type.
 	 */
 	private final String outputFormatType;
-	
+
 	/**
 	 * The output quality settings which will be used by the image compressor.
 	 * <p>
@@ -129,19 +129,19 @@ public class ThumbnailParameter
 	 * of the output codec should be used.
 	 */
 	private final float outputQuality;
-	
+
 	/**
 	 * The image type of the {@code BufferedImage} used for the thumbnail.
 	 */
 	private final int imageType;
-	
+
 	/**
 	 * {@link ImageFilter}s to apply to the thumbnail.
 	 * <p>
 	 * The filters will be applied after the original image has been resized.
 	 */
 	private final List<ImageFilter> filters;
-	
+
 	/**
 	 * The {@link ResizerFactory} for obtaining a {@link Resizer} that is
 	 * to be used when performing an image resizing operation.
@@ -155,7 +155,7 @@ public class ThumbnailParameter
 	 * be used to create the thumbnail.
 	 */
 	private final Region sourceRegion;
-	
+
 	/**
 	 * Whether or not to fit the thumbnail within the specified dimensions.
 	 * <p>
@@ -164,19 +164,23 @@ public class ThumbnailParameter
 	 * those dimensions.
 	 */
 	private final boolean fitWithinDimensions;
-	
+
 	/**
 	 * Whether or not to use the Exif orientation metadata to orient the
 	 * thumbnails.
 	 */
 	private final boolean useExifOrientation;
-	
+
+    private final boolean useFrame;
+
+    private final Color frameColor;
+
 	/**
 	 * Private constructor which sets all the required fields, and performs
 	 * validation of the given arguments.
 	 * <p>
 	 * This constructor is to be called from all the public constructors.
-	 * 
+	 *
 	 * @param thumbnailSize		The size of the thumbnail to generate.
 	 * @param widthScalingFactor	The scaling factor to apply to the width
 	 * 								when creating a	thumbnail from the original
@@ -247,7 +251,7 @@ public class ThumbnailParameter
 	 * 								If {@code true} is specified, then the
 	 * 								Exif metadata will be used to determine
 	 * 								the orientation of the thumbnail.
-	 * 
+	 *
 	 * @throws IllegalArgumentException 	If the scaling factor is not a
 	 * 										rational number or is less than or
 	 * 										equal to 0, or if the
@@ -266,20 +270,22 @@ public class ThumbnailParameter
 			List<ImageFilter> filters,
 			ResizerFactory resizerFactory,
 			boolean fitWithinDimensions,
-			boolean useExifOrientation
+			boolean useExifOrientation,
+            boolean useFrame,
+            Color frameColor
 	)
 	{
 		// The following 2 fields are set by the public constructors.
 		this.thumbnailSize = thumbnailSize;
 		this.widthScalingFactor = widthScalingFactor;
 		this.heightScalingFactor = heightScalingFactor;
-		
+
 		this.keepAspectRatio = keepAspectRatio;
-		
+
 		this.sourceRegion = sourceRegion;
 		this.outputFormat = outputFormat;
 		this.outputFormatType = outputFormatType;
-		
+
 		/*
 		 * Note:
 		 * The value of DEFAULT_QUALITY is Float.NaN which cannot be compared
@@ -293,10 +299,10 @@ public class ThumbnailParameter
 					"between 0.0f and 1.0f, or Float.NaN to use the default " +
 			"compression quality of codec being used.");
 		}
-		
+
 		this.outputQuality = outputQuality;
 		this.imageType = imageType;
-		
+
 		// Creating a new ArrayList, as `filters` should be mutable as of 0.4.3.
 		if (filters == null)
 		{
@@ -306,17 +312,19 @@ public class ThumbnailParameter
 		{
 			this.filters = new ArrayList<ImageFilter>(filters);
 		}
-				
+
 		if (resizerFactory == null)
 		{
 			throw new IllegalArgumentException("Resizer cannot be null");
 		}
-		
+
 		this.resizerFactory = resizerFactory;
 		this.fitWithinDimensions = fitWithinDimensions;
 		this.useExifOrientation = useExifOrientation;
+        this.useFrame = useFrame;
+        this.frameColor = frameColor;
 	}
-	
+
 	/**
 	 * Perform validations on the {@code thumbnailSize} field.
 	 */
@@ -331,7 +339,7 @@ public class ThumbnailParameter
 			throw new IllegalArgumentException("Thumbnail dimensions must be greater than 0.");
 		}
 	}
-	
+
 	/**
 	 * Perform validations on the {@code scalingFactor} field.
 	 */
@@ -350,11 +358,11 @@ public class ThumbnailParameter
 			throw new IllegalArgumentException("Scaling factor must be a rational number.");
 		}
 	}
-	
+
 	/**
 	 * Creates an object holding the parameters needed in order to make a
 	 * thumbnail.
-	 * 
+	 *
 	 * @param thumbnailSize		The size of the thumbnail to generate.
 	 * @param sourceRegion		The region of the source image to use when
 	 * 							creating a thumbnail.
@@ -435,7 +443,9 @@ public class ThumbnailParameter
 			List<ImageFilter> filters,
 			Resizer resizer,
 			boolean fitWithinDimensions,
-			boolean useExifOrientation
+			boolean useExifOrientation,
+            boolean useFrame,
+            Color frameColor
 	)
 	{
 		this(
@@ -451,16 +461,18 @@ public class ThumbnailParameter
 				filters,
 				new FixedResizerFactory(resizer),
 				fitWithinDimensions,
-				useExifOrientation
+				useExifOrientation,
+                useFrame,
+                frameColor
 		);
-		
+
 		validateThumbnailSize();
 	}
-	
+
 	/**
 	 * Creates an object holding the parameters needed in order to make a
 	 * thumbnail.
-	 * 
+	 *
 	 * @param widthScalingFactor	The scaling factor to apply to the width
 	 * 								when creating a	thumbnail from the original
 	 * 								image.
@@ -529,7 +541,7 @@ public class ThumbnailParameter
 	 * 								If {@code true} is specified, then the
 	 * 								Exif metadata will be used to determine
 	 * 								the orientation of the thumbnail.
-	 * 
+	 *
 	 * @throws IllegalArgumentException 	If the scaling factor is not a
 	 * 										rational number or is less than or
 	 * 										equal to 0, or if the
@@ -548,7 +560,9 @@ public class ThumbnailParameter
 			List<ImageFilter> filters,
 			Resizer resizer,
 			boolean fitWithinDimensions,
-			boolean useExifOrientation
+			boolean useExifOrientation,
+            boolean useFrame,
+            Color frameColor
 	)
 	{
 		this(
@@ -564,16 +578,18 @@ public class ThumbnailParameter
 				filters,
 				new FixedResizerFactory(resizer),
 				fitWithinDimensions,
-				useExifOrientation
+				useExifOrientation,
+                useFrame,
+                frameColor
 		);
-		
+
 		validateScalingFactor();
 	}
-	
+
 	/**
 	 * Creates an object holding the parameters needed in order to make a
 	 * thumbnail.
-	 * 
+	 *
 	 * @param thumbnailSize		The size of the thumbnail to generate.
 	 * @param sourceRegion		The region of the source image to use when
 	 * 							creating a thumbnail.
@@ -638,7 +654,7 @@ public class ThumbnailParameter
 	 * 								If {@code true} is specified, then the
 	 * 								Exif metadata will be used to determine
 	 * 								the orientation of the thumbnail.
-	 * 
+	 *
 	 * @throws IllegalArgumentException 	If size is {@code null} or if the
 	 * 										dimensions are negative, or if the
 	 * 										{@link ResizerFactory} is null.
@@ -655,7 +671,9 @@ public class ThumbnailParameter
 			List<ImageFilter> filters,
 			ResizerFactory resizerFactory,
 			boolean fitWithinDimensions,
-			boolean useExifOrientation
+			boolean useExifOrientation,
+            boolean useFrame,
+            Color frameColor
 	)
 	{
 		this(
@@ -671,16 +689,18 @@ public class ThumbnailParameter
 				filters,
 				resizerFactory,
 				fitWithinDimensions,
-				useExifOrientation
+				useExifOrientation,
+                useFrame,
+                frameColor
 		);
-		
+
 		validateThumbnailSize();
 	}
-	
+
 	/**
 	 * Creates an object holding the parameters needed in order to make a
 	 * thumbnail.
-	 * 
+	 *
 	 * @param widthScalingFactor	The scaling factor to apply to the width
 	 * 								when creating a	thumbnail from the original
 	 * 								image.
@@ -750,7 +770,7 @@ public class ThumbnailParameter
 	 * 								If {@code true} is specified, then the
 	 * 								Exif metadata will be used to determine
 	 * 								the orientation of the thumbnail.
-	 * 
+	 *
 	 * @throws IllegalArgumentException 	If the scaling factor is not a
 	 * 										rational number or is less than or
 	 * 										equal to 0, or if the
@@ -769,7 +789,9 @@ public class ThumbnailParameter
 			List<ImageFilter> filters,
 			ResizerFactory resizerFactory,
 			boolean fitWithinDimensions,
-			boolean useExifOrientation
+			boolean useExifOrientation,
+            boolean useFrame,
+            Color frameColor
 	)
 	{
 		this(
@@ -785,18 +807,20 @@ public class ThumbnailParameter
 				filters,
 				resizerFactory,
 				fitWithinDimensions,
-				useExifOrientation
+				useExifOrientation,
+                useFrame,
+                frameColor
 		);
-		
+
 		validateScalingFactor();
 	}
-	
+
 	/**
 	 * Returns the size of the thumbnail.
 	 * <p>
 	 * Returns {@code null} if the scaling factor is set rather than the
 	 * explicit thumbnail size.
-	 * 
+	 *
 	 * @return		The size of the thumbnail.
 	 */
 	public Dimension getSize()
@@ -810,14 +834,14 @@ public class ThumbnailParameter
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns the scaling factor to apply to the width when creating the
 	 * thumbnail.
 	 * <p>
 	 * Returns {@link Double#NaN} if the thumbnail size is set rather than the
 	 * scaling factor.
-	 * 
+	 *
 	 * @return		The width scaling factor for the thumbnail.
 	 * @since	0.3.10
 	 */
@@ -825,14 +849,14 @@ public class ThumbnailParameter
 	{
 		return widthScalingFactor;
 	}
-	
+
 	/**
 	 * Returns the scaling factor to apply to the height when creating the
 	 * thumbnail.
 	 * <p>
 	 * Returns {@link Double#NaN} if the thumbnail size is set rather than the
 	 * scaling factor.
-	 * 
+	 *
 	 * @return		The height scaling factor for the thumbnail.
 	 * @since	0.3.10
 	 */
@@ -844,7 +868,7 @@ public class ThumbnailParameter
 	/**
 	 * Returns the type of image. The value returned is the constant used for
 	 * image types of {@link BufferedImage}.
-	 * 
+	 *
 	 * @return		The type of the image.
 	 */
 	public int getType()
@@ -855,7 +879,7 @@ public class ThumbnailParameter
 	/**
 	 * Returns whether or not the thumbnail is to maintain the aspect ratio of
 	 * the source image when creating the thumbnail.
-	 * 
+	 *
 	 * @return 		{@code true} if the thumbnail is to maintain the aspect
 	 * 				ratio of the original image, {@code false} otherwise.
 	 */
@@ -874,14 +898,14 @@ public class ThumbnailParameter
 	 * If the output format should be determined from the information available
 	 * such as the file name of the thumbnail, then this method will return
 	 * {@link ThumbnailParameter#DETERMINE_FORMAT}.
-	 * 
+	 *
 	 * @return 		The output format for the thumbnail.
 	 */
 	public String getOutputFormat()
 	{
 		return outputFormat;
 	}
-	
+
 	/**
 	 * Returns the output format type for the thumbnail.
 	 * <p>
@@ -905,7 +929,7 @@ public class ThumbnailParameter
 	 * <p>
 	 * If the default compression quality is to be used, then this method will
 	 * return {@link ThumbnailParameter#DEFAULT_QUALITY}.
-	 * 
+	 *
 	 * @return 		The compression quality settings for the thumbnail.
 	 */
 	public float getOutputQuality()
@@ -918,18 +942,18 @@ public class ThumbnailParameter
 	 * thumbnail.
 	 * <p>
 	 * These filters are applied after the original image has been resized.
-	 * 
+	 *
 	 * @return		The {@link ImageFilter}s which are applied to the thumbnail.
 	 */
 	public List<ImageFilter> getImageFilters()
 	{
 		return filters;
 	}
-	
+
 	/**
 	 * Returns the default {@link Resizer} that will be used when performing the
 	 * resizing operation to create a thumbnail.
-	 * 
+	 *
 	 * @return		The default {@link Resizer} to use when performing a resize
 	 * 				operation.
 	 */
@@ -937,12 +961,12 @@ public class ThumbnailParameter
 	{
 		return resizerFactory.getResizer();
 	}
-	
+
 	/**
 	 * Returns the {@link ResizerFactory} for obtaining a {@link Resizer} which
 	 * is to be used when performing the resizing operation to create a
 	 * thumbnail.
-	 * 
+	 *
 	 * @return		The {@link ResizerFactory} to use to obtain the
 	 * 				{@link Resizer}.
 	 */
@@ -950,11 +974,11 @@ public class ThumbnailParameter
 	{
 		return resizerFactory;
 	}
-	
+
 	/**
 	 * Returns whether or not the original image type should be used for the
 	 * thumbnail.
-	 * 
+	 *
 	 * @return		{@code true} if the original image type should be used,
 	 * 				{@code false} otherwise.
 	 */
@@ -962,11 +986,11 @@ public class ThumbnailParameter
 	{
 		return imageType == ORIGINAL_IMAGE_TYPE;
 	}
-	
+
 	/**
 	 * Returns the region of the source image to use when creating a thumbnail,
 	 * represented by a {@link Region} object.
-	 * 
+	 *
 	 * @return		The {@code Region} object representing the source region
 	 * 				to use when creating a thumbnail.
 	 * 				<p>
@@ -977,11 +1001,11 @@ public class ThumbnailParameter
 	{
 		return sourceRegion;
 	}
-	
+
 	/**
 	 * Returns whether or not to fit the thumbnail within the specified
 	 * dimensions.
-	 * 
+	 *
 	 * @return		{@code true} is returned when the thumbnail should be sized
 	 * 				to fit within the specified dimensions, if the thumbnail
 	 * 				is going to exceed those dimensions.
@@ -991,7 +1015,7 @@ public class ThumbnailParameter
 	{
 		return fitWithinDimensions;
 	}
-	
+
 	/**
 	 * Returns whether or not the Exif metadata should be used to determine
 	 * the orientation of the thumbnail.
@@ -1005,4 +1029,12 @@ public class ThumbnailParameter
 	{
 		return useExifOrientation;
 	}
+
+    public boolean useFrame() {
+        return useFrame;
+    }
+
+    public Color frameColor() {
+        return frameColor;
+    }
 }

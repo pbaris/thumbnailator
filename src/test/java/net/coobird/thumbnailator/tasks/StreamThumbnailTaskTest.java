@@ -1,10 +1,14 @@
 package net.coobird.thumbnailator.tasks;
 
-import static org.junit.Assert.*;
+import net.coobird.thumbnailator.ThumbnailParameter;
+import net.coobird.thumbnailator.builders.BufferedImageBuilder;
+import net.coobird.thumbnailator.resizers.Resizers;
+import net.coobird.thumbnailator.test.BufferedImageComparer;
+import org.junit.Ignore;
+import org.junit.Test;
 
-import static org.mockito.Mockito.*;
-
-import java.awt.Dimension;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,15 +17,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.imageio.ImageIO;
-
-import net.coobird.thumbnailator.ThumbnailParameter;
-import net.coobird.thumbnailator.builders.BufferedImageBuilder;
-import net.coobird.thumbnailator.resizers.Resizers;
-import net.coobird.thumbnailator.test.BufferedImageComparer;
-
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class StreamThumbnailTaskTest
 {
@@ -31,7 +34,7 @@ public class StreamThumbnailTaskTest
 		// given
 		InputStream is = mock(InputStream.class);
 		OutputStream os = mock(OutputStream.class);
-		
+
 		try
 		{
 			// when
@@ -62,25 +65,27 @@ public class StreamThumbnailTaskTest
 				null,
 				Resizers.PROGRESSIVE,
 				true,
-				true
+				true,
+                false,
+                Color.WHITE
 		);
-		
+
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		InputStream spyIs = spy(new FileInputStream(inputFile));
 		OutputStream spyOs = spy(new FileOutputStream(outputFile));
-		
+
 		StreamThumbnailTask task = new StreamThumbnailTask(param, spyIs, spyOs);
 		BufferedImage img = task.read();
-		
+
 		assertTrue(BufferedImageComparer.isSame(img, ImageIO.read(inputFile)));
-		
+
 		verify(spyIs, never()).close();
 		verifyZeroInteractions(spyOs);
 	}
-	
+
 	@Test
 	public void testWrite_CorrectUsage() throws IOException
 	{
@@ -95,24 +100,26 @@ public class StreamThumbnailTaskTest
 				null,
 				Resizers.PROGRESSIVE,
 				true,
-				true
+				true,
+                false,
+                Color.WHITE
 		);
-		
+
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		InputStream spyIs = spy(new FileInputStream(inputFile));
 		OutputStream spyOs = spy(new FileOutputStream(outputFile));
-		
+
 		StreamThumbnailTask task = new StreamThumbnailTask(param, spyIs, spyOs);
 		BufferedImage img = new BufferedImageBuilder(50, 50).build();
-		
+
 		task.write(img);
-		
+
 		verifyZeroInteractions(spyIs);
 		verify(spyOs, never()).close();
-		
+
 		BufferedImage outputImage = ImageIO.read(outputFile);
 		assertTrue(BufferedImageComparer.isRGBSimilar(img, outputImage));
 	}
@@ -137,14 +144,16 @@ public class StreamThumbnailTaskTest
 				null,
 				Resizers.PROGRESSIVE,
 				true,
-				true
+				true,
+                false,
+                Color.WHITE
 		);
-		
+
 		InputStream is = mock(InputStream.class);
 		OutputStream os = mock(OutputStream.class);
-		
+
 		StreamThumbnailTask task = new StreamThumbnailTask(param, is, os);
-		
+
 		assertEquals(param, task.getParam());
 
 		verifyZeroInteractions(is);

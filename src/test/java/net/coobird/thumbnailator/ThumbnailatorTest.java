@@ -1,9 +1,20 @@
 package net.coobird.thumbnailator;
 
-import static org.junit.Assert.*;
+import net.coobird.thumbnailator.builders.BufferedImageBuilder;
+import net.coobird.thumbnailator.builders.ThumbnailParameterBuilder;
+import net.coobird.thumbnailator.name.Rename;
+import net.coobird.thumbnailator.resizers.DefaultResizerFactory;
+import net.coobird.thumbnailator.resizers.ResizerFactory;
+import net.coobird.thumbnailator.tasks.SourceSinkThumbnailTask;
+import net.coobird.thumbnailator.tasks.UnsupportedFormatException;
+import net.coobird.thumbnailator.tasks.io.BufferedImageSink;
+import net.coobird.thumbnailator.tasks.io.BufferedImageSource;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
-import java.awt.Dimension;
-import java.awt.Image;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,28 +30,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.imageio.ImageIO;
-
-import net.coobird.thumbnailator.builders.BufferedImageBuilder;
-import net.coobird.thumbnailator.builders.ThumbnailParameterBuilder;
-import net.coobird.thumbnailator.name.Rename;
-import net.coobird.thumbnailator.resizers.DefaultResizerFactory;
-import net.coobird.thumbnailator.resizers.ResizerFactory;
-import net.coobird.thumbnailator.tasks.SourceSinkThumbnailTask;
-import net.coobird.thumbnailator.tasks.UnsupportedFormatException;
-import net.coobird.thumbnailator.tasks.io.BufferedImageSink;
-import net.coobird.thumbnailator.tasks.io.BufferedImageSource;
-
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link Thumbnailator} class.
- * 
+ *
  * @author coobird
  *
  */
@@ -51,13 +56,13 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -70,28 +75,28 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		Thumbnailator.createThumbnailsAsCollection(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				-42,
 				50
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -104,29 +109,29 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		Thumbnailator.createThumbnailsAsCollection(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				50,
 				-42
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -139,29 +144,29 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		Thumbnailator.createThumbnailsAsCollection(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				-42,
 				-42
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct, except
 	 *    a) The Collection is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -175,7 +180,7 @@ public class ThumbnailatorTest
 					50,
 					50
 			);
-			
+
 			fail();
 		}
 		catch (NullPointerException e)
@@ -184,19 +189,19 @@ public class ThumbnailatorTest
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct, except
 	 *    a) The Rename is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -210,7 +215,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.png"),
 				new File("src/test/resources/Thumbnailator/grid.bmp")
 		);
-		
+
 		try
 		{
 			Thumbnailator.createThumbnailsAsCollection(
@@ -219,7 +224,7 @@ public class ThumbnailatorTest
 					50,
 					50
 			);
-			
+
 			fail();
 		}
 		catch (NullPointerException e)
@@ -228,19 +233,19 @@ public class ThumbnailatorTest
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 *    a) The Collection is an empty List.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -250,7 +255,7 @@ public class ThumbnailatorTest
 		 * The files to make thumbnails of -- nothing!
 		 */
 		List<File> files = Collections.emptyList();
-		
+
 		Collection<File> resultingFiles =
 			Thumbnailator.createThumbnailsAsCollection(
 					files,
@@ -258,22 +263,22 @@ public class ThumbnailatorTest
 					50,
 					50
 			);
-		
+
 		assertTrue(resultingFiles.isEmpty());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 *    a) The Collection is an empty Set.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -283,7 +288,7 @@ public class ThumbnailatorTest
 		 * The files to make thumbnails of -- nothing!
 		 */
 		Set<File> files = Collections.emptySet();
-		
+
 		Thumbnailator.createThumbnailsAsCollection(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
@@ -291,19 +296,19 @@ public class ThumbnailatorTest
 				50
 		);
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) All data can be processed correctly.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -316,7 +321,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -325,10 +330,10 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				Rename.PREFIX_DOT_THUMBNAIL.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Collection<File> resultingFiles =
 			Thumbnailator.createThumbnailsAsCollection(
 				files,
@@ -336,35 +341,35 @@ public class ThumbnailatorTest
 				50,
 				50
 		);
-		
+
 		/*
 		 * Perform post-execution checks.
 		 */
 		Iterator<File> iter = resultingFiles.iterator();
-		
+
 		BufferedImage img0 = ImageIO.read(iter.next());
 		assertEquals(50, img0.getWidth());
 		assertEquals(50, img0.getHeight());
-		
+
 		BufferedImage img1 = ImageIO.read(iter.next());
 		assertEquals(50, img1.getWidth());
 		assertEquals(50, img1.getHeight());
-		
+
 		assertTrue(!iter.hasNext());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) A file that was specified does not exist
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IOException.class)
@@ -379,7 +384,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.bmp"),
 				new File("src/test/resources/Thumbnailator/filenotfound.gif")
 		);
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -388,32 +393,32 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				Rename.PREFIX_DOT_THUMBNAIL.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Thumbnailator.createThumbnailsAsCollection(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				50,
 				50
 		);
-			
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) The thumbnail cannot be written. (unsupported format)
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an UnsupportedFormatException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=UnsupportedFormatException.class)
@@ -428,7 +433,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.bmp"),
 				new File("src/test/resources/Thumbnailator/grid.gif")
 		);
-		
+
 		// This will force a UnsupportedFormatException when trying to output
 		// a thumbnail whose source was a gif file.
 		Rename brokenRenamer = new Rename() {
@@ -439,11 +444,11 @@ public class ThumbnailatorTest
 				{
 					return "thumbnail." + name + ".foobar";
 				}
-				
+
 				return "thumbnail." + name;
 			}
 		};
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -452,33 +457,33 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				brokenRenamer.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Thumbnailator.createThumbnailsAsCollection(
 				files,
 				brokenRenamer,
 				50,
 				50
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnailsAsCollection(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) All data can be processed correctly.
 	 * 3) The Collection is a List of a class extending File.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -492,7 +497,7 @@ public class ThumbnailatorTest
 				super(pathname);
 			}
 		}
-		
+
 		/*
 		 * The files to make thumbnails of.
 		 */
@@ -500,7 +505,7 @@ public class ThumbnailatorTest
 				new File2("src/test/resources/Thumbnailator/grid.jpg"),
 				new File2("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -509,10 +514,10 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				Rename.PREFIX_DOT_THUMBNAIL.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Collection<File> resultingFiles =
 			Thumbnailator.createThumbnailsAsCollection(
 					files,
@@ -520,34 +525,34 @@ public class ThumbnailatorTest
 					50,
 					50
 			);
-		
+
 		/*
 		 * Perform post-execution checks.
 		 */
 		Iterator<File> iter = resultingFiles.iterator();
-		
+
 		BufferedImage img0 = ImageIO.read(iter.next());
 		assertEquals(50, img0.getWidth());
 		assertEquals(50, img0.getHeight());
-		
+
 		BufferedImage img1 = ImageIO.read(iter.next());
 		assertEquals(50, img1.getWidth());
 		assertEquals(50, img1.getHeight());
-		
+
 		assertTrue(!iter.hasNext());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -560,28 +565,28 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				-42,
 				50
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -594,29 +599,29 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				50,
 				-42
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -629,29 +634,29 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				-42,
 				-42
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct, except
 	 *    a) The Collection is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -665,7 +670,7 @@ public class ThumbnailatorTest
 					50,
 					50
 			);
-			
+
 			fail();
 		}
 		catch (NullPointerException e)
@@ -674,19 +679,19 @@ public class ThumbnailatorTest
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct, except
 	 *    a) The Rename is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -700,7 +705,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.png"),
 				new File("src/test/resources/Thumbnailator/grid.bmp")
 		);
-		
+
 		try
 		{
 			Thumbnailator.createThumbnails(
@@ -709,7 +714,7 @@ public class ThumbnailatorTest
 					50,
 					50
 			);
-			
+
 			fail();
 		}
 		catch (NullPointerException e)
@@ -718,19 +723,19 @@ public class ThumbnailatorTest
 			throw e;
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 *    a) The Collection is an empty List.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -740,7 +745,7 @@ public class ThumbnailatorTest
 		 * The files to make thumbnails of -- nothing!
 		 */
 		List<File> files = Collections.emptyList();
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
@@ -748,19 +753,19 @@ public class ThumbnailatorTest
 				50
 		);
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 *    a) The Collection is an empty Set.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -770,7 +775,7 @@ public class ThumbnailatorTest
 		 * The files to make thumbnails of -- nothing!
 		 */
 		Set<File> files = Collections.emptySet();
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
@@ -778,19 +783,19 @@ public class ThumbnailatorTest
 				50
 		);
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) All data can be processed correctly.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -803,7 +808,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.jpg"),
 				new File("src/test/resources/Thumbnailator/grid.png")
 		);
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -812,45 +817,45 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				Rename.PREFIX_DOT_THUMBNAIL.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				50,
 				50
 		);
-		
+
 		/*
 		 * Perform post-execution checks.
 		 */
 		BufferedImage img0 =
 			ImageIO.read(new File("src/test/resources/Thumbnailator/thumbnail.grid.jpg"));
-		
+
 		assertEquals(50, img0.getWidth());
 		assertEquals(50, img0.getHeight());
-		
+
 		BufferedImage img1 =
 			ImageIO.read(new File("src/test/resources/Thumbnailator/thumbnail.grid.png"));
-		
+
 		assertEquals(50, img1.getWidth());
 		assertEquals(50, img1.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) A file that was specified does not exist
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IOException.class)
@@ -865,7 +870,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.bmp"),
 				new File("src/test/resources/Thumbnailator/filenotfound.gif")
 		);
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -874,32 +879,32 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				Rename.PREFIX_DOT_THUMBNAIL.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				Rename.PREFIX_DOT_THUMBNAIL,
 				50,
 				50
 		);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnails(Collection, Rename, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) All parameters are correct
 	 * 2) The thumbnail cannot be written. (unsupported format)
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an UnsupportedFormatException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=UnsupportedFormatException.class)
@@ -914,7 +919,7 @@ public class ThumbnailatorTest
 				new File("src/test/resources/Thumbnailator/grid.bmp"),
 				new File("src/test/resources/Thumbnailator/grid.gif")
 		);
-		
+
 		// This will force a UnsupportedFormatException when trying to output
 		// a thumbnail whose source was a gif file.
 		Rename brokenRenamer = new Rename() {
@@ -925,11 +930,11 @@ public class ThumbnailatorTest
 				{
 					return "thumbnail." + name + ".foobar";
 				}
-				
+
 				return "thumbnail." + name;
 			}
 		};
-		
+
 		/*
 		 * Used to perform clean up.
 		 */
@@ -938,17 +943,17 @@ public class ThumbnailatorTest
 			String fileName = f.getName();
 			String newFileName =
 				brokenRenamer.apply(fileName, null);
-			
+
 			new File(f.getParent(), newFileName).deleteOnExit();
 		}
-		
+
 		Thumbnailator.createThumbnails(
 				files,
 				brokenRenamer,
 				50,
 				50
 		);
-		
+
 		fail();
 	}
 
@@ -956,13 +961,13 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) InputStream is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -973,23 +978,23 @@ public class ThumbnailatorTest
 		 */
 		InputStream is = null;
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) OutputStream is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -1001,24 +1006,24 @@ public class ThumbnailatorTest
 		byte[] bytes = makeImageData("jpg", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = null;
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) InputStream is null
 	 * 2) OutputStream is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -1027,18 +1032,18 @@ public class ThumbnailatorTest
 		Thumbnailator.createThumbnail((InputStream)null, null, 50, 50);
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -1050,23 +1055,23 @@ public class ThumbnailatorTest
 		byte[] bytes = makeImageData("jpg", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, -42, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -1078,24 +1083,24 @@ public class ThumbnailatorTest
 		byte[] bytes = makeImageData("jpg", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -1107,24 +1112,24 @@ public class ThumbnailatorTest
 		byte[] bytes = makeImageData("jpg", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, -42, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1136,33 +1141,33 @@ public class ThumbnailatorTest
 		byte[] bytes = makeImageData("jpg", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage thumb = ImageIO.read(thumbIs);
-		
+
 		assertEquals(50, thumb.getWidth());
 		assertEquals(50, thumb.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_IOII_Png() throws IOException
 	{
@@ -1172,33 +1177,33 @@ public class ThumbnailatorTest
 		byte[] bytes = makeImageData("png", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage thumb = ImageIO.read(thumbIs);
-		
+
 		assertEquals(50, thumb.getWidth());
 		assertEquals(50, thumb.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_IOII_Bmp() throws IOException
 	{
@@ -1209,38 +1214,38 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.bmp");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage thumb = ImageIO.read(thumbIs);
-		
+
 		assertEquals(50, thumb.getWidth());
 		assertEquals(50, thumb.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a BMP image
 	 *    -> writing to a BMP is not supported by default.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_IOII_Gif() throws IOException
 	{
@@ -1251,28 +1256,28 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.gif");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(is, os, 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 			BufferedImage img = ImageIO.read(thumbIs);
 			thumbIs.close();
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -1282,7 +1287,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (UnsupportedFormatException e)
 		{
@@ -1291,25 +1296,25 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertEquals("No suitable ImageWriter found for gif.", e.getMessage());
 			assertEquals("gif", e.getFormatName());
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) InputStream throws an IOException during read.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test(expected=IOException.class)
 	public void testCreateThumbnail_IOII_IOExceptionFromIS() throws IOException
 	{
@@ -1320,11 +1325,11 @@ public class ThumbnailatorTest
 		doThrow(new IOException("read error!")).when(is).read();
 		doThrow(new IOException("read error!")).when(is).read((byte[])any());
 		doThrow(new IOException("read error!")).when(is).read((byte[])any(), anyInt(), anyInt());
-		
+
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		fail();
 	}
 
@@ -1332,15 +1337,15 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) OutputStream throws an IOException during read.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test(expected=IOException.class)
 	public void testCreateThumbnail_IOII_IOExceptionFromOS() throws IOException
 	{
@@ -1349,14 +1354,14 @@ public class ThumbnailatorTest
 		 */
 		byte[] bytes = makeImageData("png", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
-		
+
 		OutputStream os = mock(OutputStream.class);
 		doThrow(new IOException("write error!")).when(os).write(anyInt());
 		doThrow(new IOException("write error!")).when(os).write((byte[])any());
 		doThrow(new IOException("write error!")).when(os).write((byte[])any(), anyInt(), anyInt());
-		
+
 		Thumbnailator.createThumbnail(is, os, 50, 50);
-		
+
 		fail();
 	}
 
@@ -1364,16 +1369,16 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a JPEG image
 	 *   b) Output file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1386,18 +1391,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.jpg");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "png", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"png",
 				ImageIO.getImageReaders(
@@ -1408,21 +1413,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a JPEG image
 	 *   b) Output file is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1435,18 +1440,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.jpg");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "bmp", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"bmp",
 				ImageIO.getImageReaders(
@@ -1457,23 +1462,23 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a JPEG image
 	 *   b) Output file is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will fail with an IllegalArgumentException due to not
 	 *    being able to write to a GIF.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1486,28 +1491,28 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.jpg");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(is, os, "gif", 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 			BufferedImage img = ImageIO.read(thumbIs);
 			thumbIs.close();
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -1517,7 +1522,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1526,25 +1531,25 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertTrue(e.getMessage().contains("gif"));
-		}		
+		}
 	}
 
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a PNG image
 	 *   b) Output file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1560,15 +1565,15 @@ public class ThumbnailatorTest
 
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "jpg", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"JPEG",
 				ImageIO.getImageReaders(
@@ -1579,21 +1584,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a PNG image
 	 *   b) Output file is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1609,15 +1614,15 @@ public class ThumbnailatorTest
 
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "bmp", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"bmp",
 				ImageIO.getImageReaders(
@@ -1628,23 +1633,23 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a PNG image
 	 *   b) Output file is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will fail with an IllegalArgumentException due to not
 	 *    being able to write to a GIF.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1657,28 +1662,28 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.png");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(is, os, "gif", 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 			BufferedImage img = ImageIO.read(thumbIs);
 			thumbIs.close();
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -1688,7 +1693,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1697,7 +1702,7 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertTrue(e.getMessage().contains("gif"));
 		}
 	}
@@ -1706,16 +1711,16 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a BMP image
 	 *   b) Output file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1728,18 +1733,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.bmp");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "png", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"png",
 				ImageIO.getImageReaders(
@@ -1750,21 +1755,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a BMP image
 	 *   b) Output file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1777,18 +1782,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.bmp");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "jpg", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"JPEG",
 				ImageIO.getImageReaders(
@@ -1799,23 +1804,23 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a BMP image
 	 *   b) Output file is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will fail with an IllegalArgumentException due to not
 	 *    being able to write to a GIF.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1828,28 +1833,28 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.bmp");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(is, os, "gif", 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 			BufferedImage img = ImageIO.read(thumbIs);
 			thumbIs.close();
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -1859,7 +1864,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -1868,25 +1873,25 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertTrue(e.getMessage().contains("gif"));
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a GIF image
 	 *   b) Output file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1899,18 +1904,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.gif");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "png", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"png",
 				ImageIO.getImageReaders(
@@ -1921,21 +1926,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a GIF image
 	 *   b) Output file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1948,18 +1953,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.gif");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "jpg", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"JPEG",
 				ImageIO.getImageReaders(
@@ -1970,21 +1975,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a GIF image
 	 *   b) Output file is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -1997,18 +2002,18 @@ public class ThumbnailatorTest
 		FileInputStream fis = new FileInputStream("src/test/resources/Thumbnailator/grid.gif");
 		fis.read(bytes);
 		fis.close();
-		
+
 		InputStream is = new ByteArrayInputStream(bytes);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "bmp", 50, 50);
-		
+
 		/*
 		 * Post-test checks
 		 */
 		InputStream thumbIs = new ByteArrayInputStream(os.toByteArray());
 		BufferedImage img = ImageIO.read(thumbIs);
-		
+
 		assertEquals(
 				"bmp",
 				ImageIO.getImageReaders(
@@ -2024,15 +2029,15 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) InputStream throws an IOException during read.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test(expected=IOException.class)
 	public void testCreateThumbnail_IOSII_IOExceptionFromIS() throws IOException
 	{
@@ -2043,11 +2048,11 @@ public class ThumbnailatorTest
 		doThrow(new IOException("read error!")).when(is).read();
 		doThrow(new IOException("read error!")).when(is).read((byte[])any());
 		doThrow(new IOException("read error!")).when(is).read((byte[])any(), anyInt(), anyInt());
-		
+
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		
+
 		Thumbnailator.createThumbnail(is, os, "png", 50, 50);
-		
+
 		fail();
 	}
 
@@ -2055,15 +2060,15 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(InputStream, OutputStream, String, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) OutputStream throws an IOException during read.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test(expected=IOException.class)
 	public void testCreateThumbnail_IOSII_IOExceptionFromOS() throws IOException
 	{
@@ -2072,28 +2077,28 @@ public class ThumbnailatorTest
 		 */
 		byte[] bytes = makeImageData("png", 200, 200);
 		InputStream is = new ByteArrayInputStream(bytes);
-		
+
 		OutputStream os = mock(OutputStream.class);
 		doThrow(new IOException("write error!")).when(os).write(anyInt());
 		doThrow(new IOException("write error!")).when(os).write((byte[])any());
 		doThrow(new IOException("write error!")).when(os).write((byte[])any(), anyInt(), anyInt());
-		
+
 		Thumbnailator.createThumbnail(is, os, "png", 50, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Input File is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -2104,23 +2109,23 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = null;
 		File outputFile = new File("bar.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Output File is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -2131,24 +2136,24 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = new File("foo.jpg");
 		File outputFile = null;
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Input File is null
 	 * 2) Output File is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -2157,18 +2162,18 @@ public class ThumbnailatorTest
 		Thumbnailator.createThumbnail((File)null, null, 50, 50);
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -2179,23 +2184,23 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = new File("foo.jpg");
 		File outputFile = new File("bar.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, -42, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -2206,24 +2211,24 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = new File("foo.jpg");
 		File outputFile = new File("bar.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -2234,24 +2239,24 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = new File("foo.jpg");
 		File outputFile = new File("bar.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, -42, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2263,27 +2268,27 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = new File("src/test/resources/Thumbnailator/tmp.jpg");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2295,9 +2300,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.png");
 		File outputFile = new File("src/test/resources/Thumbnailator/tmp.png");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(50, img.getWidth());
@@ -2308,16 +2313,16 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_FFII_Bmp() throws IOException
 	{
@@ -2327,30 +2332,30 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.bmp");
 		File outputFile = new File("src/test/resources/Thumbnailator/tmp.bmp");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_FFII_Gif() throws IOException
 	{
@@ -2360,23 +2365,23 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.gif");
 		File outputFile = new File("src/test/resources/Thumbnailator/tmp.gif");
 		outputFile.deleteOnExit();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			BufferedImage img = ImageIO.read(outputFile);
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -2385,7 +2390,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (UnsupportedFormatException e)
 		{
@@ -2394,26 +2399,26 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertEquals("No suitable ImageWriter found for gif.", e.getMessage());
 			assertEquals("gif", e.getFormatName());
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a JPEG image
 	 *   b) Output file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2425,9 +2430,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2439,21 +2444,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a JPEG image
 	 *   b) Output file is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2465,9 +2470,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".bmp");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2479,22 +2484,22 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a JPEG image
 	 *   b) Output file is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2506,23 +2511,23 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".gif");
 		outputFile.deleteOnExit();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			BufferedImage img = ImageIO.read(outputFile);
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -2531,7 +2536,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (UnsupportedFormatException e)
 		{
@@ -2540,7 +2545,7 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertEquals("No suitable ImageWriter found for gif.", e.getMessage());
 			assertEquals("gif", e.getFormatName());
 		}
@@ -2550,16 +2555,16 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a PNG image
 	 *   b) Output file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2571,9 +2576,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.png");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".jpg");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2585,21 +2590,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a PNG image
 	 *   b) Output file is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2611,9 +2616,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.png");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".bmp");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2625,22 +2630,22 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a PNG image
 	 *   b) Output file is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2652,23 +2657,23 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.png");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".gif");
 		outputFile.deleteOnExit();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			BufferedImage img = ImageIO.read(outputFile);
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -2677,7 +2682,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (UnsupportedFormatException e)
 		{
@@ -2686,26 +2691,26 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertEquals("No suitable ImageWriter found for gif.", e.getMessage());
 			assertEquals("gif", e.getFormatName());
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a BMP image
 	 *   b) Output file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2717,9 +2722,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.bmp");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2731,21 +2736,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a BMP image
 	 *   b) Output file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2757,9 +2762,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.bmp");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".jpg");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2771,22 +2776,22 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a BMP image
 	 *   b) Output file is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
 	 *    On Java 6 and later, this should pass, as it contains a GIF writer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2798,23 +2803,23 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.bmp");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".gif");
 		outputFile.deleteOnExit();
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-			
+
 			// This case should pass on Java 6 and later, as those JREs have a
 			// GIF writer.
 			if (System.getProperty("java.version").startsWith("1.5"))
 			{
 				fail();
 			}
-			
+
 			/*
 			 * Post-test checks
 			 */
 			BufferedImage img = ImageIO.read(outputFile);
-			
+
 			assertEquals(
 					"gif",
 					ImageIO.getImageReaders(
@@ -2823,7 +2828,7 @@ public class ThumbnailatorTest
 			);
 			assertEquals(50, img.getWidth());
 			assertEquals(50, img.getHeight());
-			
+
 		}
 		catch (UnsupportedFormatException e)
 		{
@@ -2832,26 +2837,26 @@ public class ThumbnailatorTest
 			{
 				fail();
 			}
-			
+
 			assertEquals("No suitable ImageWriter found for gif.", e.getMessage());
 			assertEquals("gif", e.getFormatName());
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a GIF image
 	 *   b) Output file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2863,9 +2868,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.gif");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2877,21 +2882,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a GIF image
 	 *   b) Output file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2903,9 +2908,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.gif");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".jpg");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2917,21 +2922,21 @@ public class ThumbnailatorTest
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) There is transcoding taking place:
 	 *   a) Input file is a GIF image
 	 *   b) Output file is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2943,9 +2948,9 @@ public class ThumbnailatorTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.gif");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".bmp");
 		outputFile.deleteOnExit();
-		
+
 		Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
-		
+
 		assertTrue(outputFile.exists());
 		BufferedImage img = ImageIO.read(outputFile);
 		assertEquals(
@@ -2956,19 +2961,19 @@ public class ThumbnailatorTest
 		);
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
-	}	
+	}
 
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Input File does not exist.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -2979,7 +2984,7 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = new File("foo.jpg");
 		File outputFile = new File("bar.jpg");
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
@@ -2990,18 +2995,18 @@ public class ThumbnailatorTest
 			assertEquals("Input file does not exist.", e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) A filename that is invalid
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3012,7 +3017,7 @@ public class ThumbnailatorTest
 		 */
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = new File("@\\#?/^%*&/|!!$:#");
-		
+
 		try
 		{
 			Thumbnailator.createThumbnail(inputFile, outputFile, 50, 50);
@@ -3023,18 +3028,18 @@ public class ThumbnailatorTest
 			// An IOException is expected. Likely a FileNotFoundException.
 		}
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) A problem occurs while writing to the file.
 	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IOException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Ignore
@@ -3048,13 +3053,13 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Input File is null
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an NullPointerException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=NullPointerException.class)
@@ -3063,18 +3068,18 @@ public class ThumbnailatorTest
 		Thumbnailator.createThumbnail((File)null, 50, 50);
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -3084,23 +3089,23 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("foo.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, -42, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -3110,24 +3115,24 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("foo.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, 50, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test(expected=IllegalArgumentException.class)
@@ -3137,24 +3142,24 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("foo.jpg");
-		
+
 		Thumbnailator.createThumbnail(inputFile, -42, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input file is a JPEG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3164,25 +3169,25 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
-		
+
 		BufferedImage img = Thumbnailator.createThumbnail(inputFile, 50, 50);
-		
+
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input file is a PNG image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3192,9 +3197,9 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.png");
-		
+
 		BufferedImage img = Thumbnailator.createThumbnail(inputFile, 50, 50);
-		
+
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
@@ -3203,16 +3208,16 @@ public class ThumbnailatorTest
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a BMP image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_FII_Bmp() throws IOException
 	{
@@ -3220,27 +3225,27 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.bmp");
-		
+
 		BufferedImage img = Thumbnailator.createThumbnail(inputFile, 50, 50);
-		
+
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(File, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
 	 * 2) Input data is a GIF image
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 * @throws IOException
-	 */	
+	 */
 	@Test
 	public void testCreateThumbnail_FII_Gif() throws IOException
 	{
@@ -3248,24 +3253,24 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.gif");
-		
+
 		BufferedImage img = Thumbnailator.createThumbnail(inputFile, 50, 50);
-		
+
 		assertEquals(50, img.getWidth());
 		assertEquals(50, img.getHeight());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(BufferedImage, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testCreateThumbnail_BII_negativeWidth()
@@ -3274,23 +3279,23 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
-		
+
 		Thumbnailator.createThumbnail(img, -42, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(BufferedImage, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testCreateThumbnail_BII_negativeHeight()
@@ -3299,24 +3304,24 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
-		
+
 		Thumbnailator.createThumbnail(img, 50, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(BufferedImage, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testCreateThumbnail_BII_negativeWidthAndHeight()
@@ -3325,23 +3330,23 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
-		
+
 		Thumbnailator.createThumbnail(img, -42, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(BufferedImage, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 */
 	@Test
 	public void testCreateThumbnail_BII_CorrectUsage()
@@ -3351,25 +3356,25 @@ public class ThumbnailatorTest
 		 */
 		BufferedImage img =
 			new BufferedImageBuilder(200, 200, BufferedImage.TYPE_INT_ARGB).build();
-		
+
 		BufferedImage thumbnail = Thumbnailator.createThumbnail(img, 50, 50);
-		
+
 		assertEquals(50, thumbnail.getWidth());
 		assertEquals(50, thumbnail.getHeight());
 		assertEquals(BufferedImage.TYPE_INT_ARGB, thumbnail.getType());
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(Image, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testCreateThumbnail_III_negativeWidth()
@@ -3378,23 +3383,23 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
-		
+
 		Thumbnailator.createThumbnail((Image)img, -42, 50);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(Image, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testCreateThumbnail_III_negativeHeight()
@@ -3403,24 +3408,24 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
-		
+
 		Thumbnailator.createThumbnail((Image)img, 50, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(Image, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Width is negative.
 	 * 2) Height is negative.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will stop with an IllegalArgumentException.
-	 * 
+	 *
 	 */
 	@Test(expected=IllegalArgumentException.class)
 	public void testCreateThumbnail_III_negativeWidthAndHeight()
@@ -3429,23 +3434,23 @@ public class ThumbnailatorTest
 		 * Actual test
 		 */
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
-		
+
 		Thumbnailator.createThumbnail((Image)img, -42, -42);
-		
+
 		fail();
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(Image, int, int)}
 	 * where,
-	 * 
+	 *
 	 * 1) Method arguments are correct
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) Processing will complete successfully.
-	 * 
+	 *
 	 */
 	@Test
 	public void testCreateThumbnail_III_CorrectUsage()
@@ -3455,25 +3460,25 @@ public class ThumbnailatorTest
 		 */
 		BufferedImage img =
 			new BufferedImageBuilder(200, 200, BufferedImage.TYPE_INT_ARGB).build();
-		
+
 		Image thumbnail = Thumbnailator.createThumbnail((Image)img, 50, 50);
-		
+
 		assertEquals(50, thumbnail.getWidth(null));
 		assertEquals(50, thumbnail.getHeight(null));
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(net.coobird.thumbnailator.tasks.ThumbnailTask)}
 	 * where,
-	 * 
+	 *
 	 * 1) The correct parameters are given.
 	 * 2) The size is specified for the ThumbnailParameter.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) The ResizerFactory is being used.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3485,38 +3490,38 @@ public class ThumbnailatorTest
 		);
 		BufferedImageSink sink = new BufferedImageSink();
 		ResizerFactory resizerFactory = spy(DefaultResizerFactory.getInstance());
-		
+
 		ThumbnailParameter param =
 			new ThumbnailParameterBuilder()
 				.size(100, 100)
 				.resizerFactory(resizerFactory)
 				.build();
-		
-		
+
+
 		// when
 		Thumbnailator.createThumbnail(
 				new SourceSinkThumbnailTask<BufferedImage, BufferedImage>(
 						param, source, sink
 				)
 		);
-		
+
 		// then
 		verify(resizerFactory)
 				.getResizer(new Dimension(200, 200), new Dimension(100, 100));
 	}
-	
+
 	/**
 	 * Test for
 	 * {@link Thumbnailator#createThumbnail(net.coobird.thumbnailator.tasks.ThumbnailTask)}
 	 * where,
-	 * 
+	 *
 	 * 1) The correct parameters are given.
 	 * 2) The scale is specified for the ThumbnailParameter.
-	 * 
+	 *
 	 * Expected outcome is,
-	 * 
+	 *
 	 * 1) The ResizerFactory is being used.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test
@@ -3528,21 +3533,21 @@ public class ThumbnailatorTest
 		);
 		BufferedImageSink sink = new BufferedImageSink();
 		ResizerFactory resizerFactory = spy(DefaultResizerFactory.getInstance());
-		
+
 		ThumbnailParameter param =
 			new ThumbnailParameterBuilder()
 				.scale(0.5)
 				.resizerFactory(resizerFactory)
 				.build();
-		
-		
+
+
 		// when
 		Thumbnailator.createThumbnail(
 				new SourceSinkThumbnailTask<BufferedImage, BufferedImage>(
 						param, source, sink
 				)
 		);
-		
+
 		// then
 		verify(resizerFactory)
 			.getResizer(new Dimension(200, 200), new Dimension(100, 100));
@@ -3555,23 +3560,23 @@ public class ThumbnailatorTest
 		Rename rename = mock(Rename.class);
 		when(rename.apply(anyString(), any(ThumbnailParameter.class)))
 			.thenReturn("thumbnail.grid.png");
-				
+
 		File f = new File("src/test/resources/Thumbnailator/grid.png");
-		
+
 		// when
 		Thumbnailator.createThumbnails(Arrays.asList(f), rename, 50, 50);
-		
+
 		// then
 		ArgumentCaptor<ThumbnailParameter> ac =
 			ArgumentCaptor.forClass(ThumbnailParameter.class);
-		
+
 		verify(rename).apply(eq(f.getName()), ac.capture());
 		assertEquals(new Dimension(50, 50), ac.getValue().getSize());
-		
+
 		// clean up
 		new File("src/test/resources/Thumbnailator/thumbnail.grid.png").deleteOnExit();
 	}
-	
+
 	@Test
 	public void renameGivenThumbnailParameter_createThumbnailsAsCollection() throws IOException
 	{
@@ -3579,26 +3584,26 @@ public class ThumbnailatorTest
 		Rename rename = mock(Rename.class);
 		when(rename.apply(anyString(), any(ThumbnailParameter.class)))
 			.thenReturn("thumbnail.grid.png");
-		
+
 		File f = new File("src/test/resources/Thumbnailator/grid.png");
-		
+
 		// when
 		Thumbnailator.createThumbnailsAsCollection(Arrays.asList(f), rename, 50, 50);
-		
+
 		// then
 		ArgumentCaptor<ThumbnailParameter> ac =
 			ArgumentCaptor.forClass(ThumbnailParameter.class);
-		
+
 		verify(rename).apply(eq(f.getName()), ac.capture());
 		assertEquals(new Dimension(50, 50), ac.getValue().getSize());
-		
+
 		// clean up
 		new File("src/test/resources/Thumbnailator/thumbnail.grid.png").deleteOnExit();
 	}
-	
+
 	/**
 	 * Returns test image data as an array of {@code byte}s.
-	 * 
+	 *
 	 * @param format			Image format.
 	 * @param width				Image width.
 	 * @param height			Image height.
@@ -3611,7 +3616,7 @@ public class ThumbnailatorTest
 		BufferedImage img = new BufferedImageBuilder(200, 200).build();
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ImageIO.write(img, format, baos);
-		
+
 		return baos.toByteArray();
 	}
 }

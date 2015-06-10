@@ -1,8 +1,6 @@
 package net.coobird.thumbnailator;
 
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -83,7 +81,7 @@ Thumbnails.of(directory.listFiles())
  * </DL>
  * For more examples, please visit the <a href="http://code.google.com/p/thumbnailator/">
  * Thumbnailator</a> project page.
- * <p> 
+ * <p>
  * <h2>Important Implementation Notes</h2>
  * Upon calling one of the {@code Thumbnails.of(...)} methods, <em>in the
  * current implementation</em>, an instance of an inner class of this class is
@@ -95,7 +93,7 @@ Thumbnails.of(directory.listFiles())
  * all the way until the output method (e.g. {@code toFile}, {@code asBufferedImage},
  * etc.) is called without breaking them down into single statements.</em>
  * See the "Usage" section above for the intended use of the Thumbnailator's
- * fluent interface. 
+ * fluent interface.
  * <DL>
  * <DT><B>Unintended Use:</B></DT>
  * <DD>
@@ -107,7 +105,7 @@ instance.asFiles("path/to/thumbnail");
  * </pre>
  * </DD>
  * </DL>
- * 
+ *
  * @author coobird
  *
  */
@@ -117,7 +115,7 @@ public final class Thumbnails
 	 * This class is not intended to be instantiated.
 	 */
 	private Thumbnails() {}
-	
+
 	/**
 	 * Performs validation on the specified dimensions.
 	 * <p>
@@ -127,7 +125,7 @@ public final class Thumbnails
 	 * <p>
 	 * This method is used to perform a check on the output dimensions of a
 	 * thumbnail for the {@link Thumbnails#createThumbnail} methods.
-	 * 
+	 *
 	 * @param width		The width to validate.
 	 * @param height	The height to validate.
 	 */
@@ -143,14 +141,14 @@ public final class Thumbnails
 		else if (width <= 0 || height <= 0)
 		{
 			String dimension = width == 0 ? "width" : "height";
-			
+
 			throw new IllegalArgumentException(
 					"Destination image " + dimension + " must not be " +
 					"less than or equal to 0 pixels."
 			);
-		}		
+		}
 	}
-	
+
 	private static void checkForNull(Object o, String message)
 	{
 		if (o == null)
@@ -158,7 +156,7 @@ public final class Thumbnails
 			throw new NullPointerException(message);
 		}
 	}
-	
+
 	private static void checkForEmpty(Object[] o, String message)
 	{
 		if (o.length == 0)
@@ -166,7 +164,7 @@ public final class Thumbnails
 			throw new IllegalArgumentException(message);
 		}
 	}
-	
+
 	private static void checkForEmpty(Iterable<?> o, String message)
 	{
 		if (!o.iterator().hasNext())
@@ -174,10 +172,10 @@ public final class Thumbnails
 			throw new IllegalArgumentException(message);
 		}
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails for images with the specified filenames.
-	 * 
+	 *
 	 * @param files		File names of image files for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -191,10 +189,10 @@ public final class Thumbnails
 		checkForEmpty(files, "Cannot specify an empty array for input files.");
 		return Builder.ofStrings(Arrays.asList(files));
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails from the specified {@link File}s.
-	 * 
+	 *
 	 * @param files		{@link File} objects of image files for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -208,10 +206,10 @@ public final class Thumbnails
 		checkForEmpty(files, "Cannot specify an empty array for input files.");
 		return Builder.ofFiles(Arrays.asList(files));
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails from the specified {@link URL}s.
-	 * 
+	 *
 	 * @param urls		{@link URL} objects of image files for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -225,10 +223,10 @@ public final class Thumbnails
 		checkForEmpty(urls, "Cannot specify an empty array for input URLs.");
 		return Builder.ofUrls(Arrays.asList(urls));
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails from the specified {@link InputStream}s.
-	 * 
+	 *
 	 * @param inputStreams		{@link InputStream}s which provide the images
 	 * 							for which thumbnails are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -242,10 +240,10 @@ public final class Thumbnails
 		checkForEmpty(inputStreams, "Cannot specify an empty array for InputStreams.");
 		return Builder.ofInputStreams(Arrays.asList(inputStreams));
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails from the specified {@link BufferedImage}s.
-	 * 
+	 *
 	 * @param images	{@link BufferedImage}s for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -259,10 +257,10 @@ public final class Thumbnails
 		checkForEmpty(images, "Cannot specify an empty array for images.");
 		return Builder.ofBufferedImages(Arrays.asList(images));
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails for images with the specified filenames.
-	 * 
+	 *
 	 * @param files		File names of image files for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -277,10 +275,10 @@ public final class Thumbnails
 		checkForEmpty(files, "Cannot specify an empty collection for input files.");
 		return Builder.ofStrings(files);
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails from the specified {@link File}s.
-	 * 
+	 *
 	 * @param files		{@link File} objects of image files for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -298,7 +296,7 @@ public final class Thumbnails
 
 	/**
 	 * Indicate to make thumbnails for images with the specified {@link URL}s.
-	 * 
+	 *
 	 * @param urls		URLs of the images for which thumbnails
 	 * 					are to be produced.
 	 * @return			Reference to a builder object which is used to
@@ -313,11 +311,11 @@ public final class Thumbnails
 		checkForEmpty(urls, "Cannot specify an empty collection for input URLs.");
 		return Builder.ofUrls(urls);
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails for images obtained from the specified
 	 * {@link InputStream}s.
-	 * 
+	 *
 	 * @param inputStreams		{@link InputStream}s which provide images for
 	 * 							which thumbnails are to be produced.
 	 * @return			Reference to a builder object which is used to
@@ -332,10 +330,10 @@ public final class Thumbnails
 		checkForEmpty(inputStreams, "Cannot specify an empty collection for InputStreams.");
 		return Builder.ofInputStreams(inputStreams);
 	}
-	
+
 	/**
 	 * Indicate to make thumbnails from the specified {@link BufferedImage}s.
-	 * 
+	 *
 	 * @param images	{@link BufferedImage}s for which thumbnails
 	 * 					are to be produced for.
 	 * @return			Reference to a builder object which is used to
@@ -364,7 +362,7 @@ public final class Thumbnails
 	 * In most cases, holding an instance of this class in a local variable,
 	 * such as seen in the "Unintended Use" example below, is more verbose
 	 * and less future-proof, as changes to this class (which is just an
-	 * inner class of the {@link Thumbnails} class) can lead to broken code  
+	 * inner class of the {@link Thumbnails} class) can lead to broken code
 	 * when attempting to use future releases of Thumbnailator.
 	 * <p>
 	 * <DL>
@@ -393,10 +391,10 @@ instance.asFiles("path/to/thumbnail");
 	 * <p>
 	 * An instance of this class provides the fluent interface in the form of
 	 * method chaining. Through the fluent interface, the parameters used for
-	 * the thumbnail creation, such as {@link #size(int, int)} and 
+	 * the thumbnail creation, such as {@link #size(int, int)} and
 	 * {@link #outputQuality(double)} can be set up. Finally, to execute the
 	 * thumbnail creation, one of the output methods whose names start with
-	 * {@code to} (e.g. {@link #toFiles(Rename)}) or {@code as} 
+	 * {@code to} (e.g. {@link #toFiles(Rename)}) or {@code as}
 	 * (e.g. {@link #asBufferedImages()}) is called.
 	 * <p>
 	 * An instance of this class is obtained by calling one of:
@@ -412,46 +410,46 @@ instance.asFiles("path/to/thumbnail");
 	 * <li>{@link Thumbnails#fromInputStreams(Iterable)}</li>
 	 * <li>{@link Thumbnails#fromURLs(Iterable)}</li>
 	 * </ul>
- 	 * 
+ 	 *
 	 * @author coobird
 	 *
 	 */
 	public static class Builder<T>
 	{
 		private final Iterable<ImageSource<T>> sources;
-		
+
 		private Builder(Iterable<ImageSource<T>> sources)
 		{
 			this.sources = sources;
 			statusMap.put(Properties.OUTPUT_FORMAT, Status.OPTIONAL);
 		}
-		
+
 		private static final class StringImageSourceIterator implements
 				Iterable<ImageSource<File>>
 		{
 			private final Iterable<String> filenames;
-		
+
 			private StringImageSourceIterator(Iterable<String> filenames)
 			{
 				this.filenames = filenames;
 			}
-		
+
 			public Iterator<ImageSource<File>> iterator()
 			{
 				return new Iterator<ImageSource<File>>() {
-					
+
 					Iterator<String> iter = filenames.iterator();
-					
+
 					public boolean hasNext()
 					{
 						return iter.hasNext();
 					}
-		
+
 					public ImageSource<File> next()
 					{
 						return new FileImageSource(iter.next());
 					}
-		
+
 					public void remove()
 					{
 						throw new UnsupportedOperationException();
@@ -459,33 +457,33 @@ instance.asFiles("path/to/thumbnail");
 				};
 			}
 		}
-		
+
 		private static final class FileImageSourceIterator implements
 				Iterable<ImageSource<File>>
 		{
 			private final Iterable<File> files;
-			
+
 			private FileImageSourceIterator(Iterable<File> files)
 			{
 				this.files = files;
 			}
-			
+
 			public Iterator<ImageSource<File>> iterator()
 			{
 				return new Iterator<ImageSource<File>>() {
-					
+
 					Iterator<File> iter = files.iterator();
-					
+
 					public boolean hasNext()
 					{
 						return iter.hasNext();
 					}
-					
+
 					public ImageSource<File> next()
 					{
 						return new FileImageSource(iter.next());
 					}
-					
+
 					public void remove()
 					{
 						throw new UnsupportedOperationException();
@@ -493,33 +491,33 @@ instance.asFiles("path/to/thumbnail");
 				};
 			}
 		}
-		
+
 		private static final class URLImageSourceIterator implements
 				Iterable<ImageSource<URL>>
 		{
 			private final Iterable<URL> urls;
-			
+
 			private URLImageSourceIterator(Iterable<URL> urls)
 			{
 				this.urls = urls;
 			}
-			
+
 			public Iterator<ImageSource<URL>> iterator()
 			{
 				return new Iterator<ImageSource<URL>>() {
-					
+
 					Iterator<URL> iter = urls.iterator();
-					
+
 					public boolean hasNext()
 					{
 						return iter.hasNext();
 					}
-					
+
 					public ImageSource<URL> next()
 					{
 						return new URLImageSource(iter.next());
 					}
-					
+
 					public void remove()
 					{
 						throw new UnsupportedOperationException();
@@ -527,33 +525,33 @@ instance.asFiles("path/to/thumbnail");
 				};
 			}
 		}
-		
+
 		private static final class InputStreamImageSourceIterator implements
 				Iterable<ImageSource<InputStream>>
 		{
 			private final Iterable<? extends InputStream> inputStreams;
-			
+
 			private InputStreamImageSourceIterator(Iterable<? extends InputStream> inputStreams)
 			{
 				this.inputStreams = inputStreams;
 			}
-			
+
 			public Iterator<ImageSource<InputStream>> iterator()
 			{
 				return new Iterator<ImageSource<InputStream>>() {
-					
+
 					Iterator<? extends InputStream> iter = inputStreams.iterator();
-					
+
 					public boolean hasNext()
 					{
 						return iter.hasNext();
 					}
-					
+
 					public ImageSource<InputStream> next()
 					{
 						return new InputStreamImageSource(iter.next());
 					}
-					
+
 					public void remove()
 					{
 						throw new UnsupportedOperationException();
@@ -561,33 +559,33 @@ instance.asFiles("path/to/thumbnail");
 				};
 			}
 		}
-		
+
 		private static final class BufferedImageImageSourceIterator implements
 			Iterable<ImageSource<BufferedImage>>
 		{
 			private final Iterable<BufferedImage> image;
-			
+
 			private BufferedImageImageSourceIterator(Iterable<BufferedImage> images)
 			{
 				this.image = images;
 			}
-			
+
 			public Iterator<ImageSource<BufferedImage>> iterator()
 			{
 				return new Iterator<ImageSource<BufferedImage>>() {
-					
+
 					Iterator<BufferedImage> iter = image.iterator();
-					
+
 					public boolean hasNext()
 					{
 						return iter.hasNext();
 					}
-					
+
 					public ImageSource<BufferedImage> next()
 					{
 						return new BufferedImageSource(iter.next());
 					}
-					
+
 					public void remove()
 					{
 						throw new UnsupportedOperationException();
@@ -601,25 +599,25 @@ instance.asFiles("path/to/thumbnail");
 			Iterable<ImageSource<File>> iter = new StringImageSourceIterator(filenames);
 			return new Builder<File>(iter);
 		}
-		
+
 		private static Builder<File> ofFiles(Iterable<File> files)
 		{
 			Iterable<ImageSource<File>> iter = new FileImageSourceIterator(files);
 			return new Builder<File>(iter);
 		}
-		
+
 		private static Builder<URL> ofUrls(Iterable<URL> urls)
 		{
 			Iterable<ImageSource<URL>> iter = new URLImageSourceIterator(urls);
 			return new Builder<URL>(iter);
 		}
-		
+
 		private static Builder<InputStream> ofInputStreams(Iterable<? extends InputStream> inputStreams)
 		{
 			Iterable<ImageSource<InputStream>> iter = new InputStreamImageSourceIterator(inputStreams);
 			return new Builder<InputStream>(iter);
 		}
-		
+
 		private static Builder<BufferedImage> ofBufferedImages(Iterable<BufferedImage> images)
 		{
 			Iterable<ImageSource<BufferedImage>> iter = new BufferedImageImageSourceIterator(images);
@@ -632,7 +630,7 @@ instance.asFiles("path/to/thumbnail");
 			public Iterator<BufferedImage> iterator()
 			{
 				return new Iterator<BufferedImage>() {
-					
+
 					Iterator<ImageSource<T>> sourceIter = sources.iterator();
 
 					public boolean hasNext()
@@ -644,7 +642,7 @@ instance.asFiles("path/to/thumbnail");
 					{
 						ImageSource<T> source = sourceIter.next();
 						BufferedImageSink destination = new BufferedImageSink();
-						
+
 						try
 						{
 							Thumbnailator.createThumbnail(
@@ -655,7 +653,7 @@ instance.asFiles("path/to/thumbnail");
 						{
 							return null;
 						}
-						
+
 						return destination.getSink();
 					}
 
@@ -671,7 +669,7 @@ instance.asFiles("path/to/thumbnail");
 
 		/**
 		 * Status of each property.
-		 * 
+		 *
 		 * @author coobird
 		 *
 		 */
@@ -686,7 +684,7 @@ instance.asFiles("path/to/thumbnail");
 
 		/**
 		 * Interface used by {@link Properties}.
-		 * 
+		 *
 		 * @author coobird
 		 *
 		 */
@@ -697,7 +695,7 @@ instance.asFiles("path/to/thumbnail");
 
 		/**
 		 * Enum of properties which can be set by this builder.
-		 * 
+		 *
 		 * @author coobird
 		 *
 		 */
@@ -723,15 +721,19 @@ instance.asFiles("path/to/thumbnail");
 			ALLOW_OVERWRITE("allowOverwrite"),
 			CROP("crop"),
 			USE_EXIF_ORIENTATION("useExifOrientation"),
+
+            //pbaris
+            USE_FRAME("useFrame"),
+            FRAME_COLOR("frameColor")
 			;
-			
+
 			private final String name;
-			
+
 			private Properties(String name)
 			{
 				this.name = name;
 			}
-		
+
 			public String getName()
 			{
 				return name;
@@ -767,11 +769,14 @@ instance.asFiles("path/to/thumbnail");
 			statusMap.put(Properties.ALLOW_OVERWRITE, Status.OPTIONAL);
 			statusMap.put(Properties.CROP, Status.OPTIONAL);
 			statusMap.put(Properties.USE_EXIF_ORIENTATION, Status.OPTIONAL);
+
+            statusMap.put(Properties.USE_FRAME, Status.OPTIONAL);
+            statusMap.put(Properties.FRAME_COLOR, Status.OPTIONAL);
 		}
 
 		/**
 		 * Updates the property status map.
-		 * 
+		 *
 		 * @param property		The property to update.
 		 * @param newStatus		The new status.
 		 */
@@ -782,7 +787,7 @@ instance.asFiles("path/to/thumbnail");
 				throw new IllegalStateException(
 						property.getName() + " is already set.");
 			}
-			
+
 			/*
 			 * The `newStatus != Status.CANNOT_SET` condition will allow the
 			 * status to be set to CANNOT_SET to be set multiple times.
@@ -792,7 +797,7 @@ instance.asFiles("path/to/thumbnail");
 				throw new IllegalStateException(
 						property.getName() + " cannot be set.");
 			}
-			
+
 			statusMap.put(property, newStatus);
 		}
 
@@ -803,9 +808,9 @@ instance.asFiles("path/to/thumbnail");
 		 * imageType.
 		 */
 		private static int IMAGE_TYPE_UNSPECIFIED = -1;
-		
+
 		private static final int DIMENSION_NOT_SPECIFIED = -1;
-		
+
 		/*
 		 * Defines the fields for the builder interface, and assigns the
 		 * default values.
@@ -814,43 +819,47 @@ instance.asFiles("path/to/thumbnail");
 		private int height = DIMENSION_NOT_SPECIFIED;
 		private double scaleWidth = Double.NaN;
 		private double scaleHeight = Double.NaN;
-		
+
 		private Region sourceRegion;
-		
+
 		private int imageType = IMAGE_TYPE_UNSPECIFIED;
 		private boolean keepAspectRatio = true;
-		
+
 		private String outputFormat = ThumbnailParameter.DETERMINE_FORMAT;
 		private String outputFormatType = ThumbnailParameter.DEFAULT_FORMAT_TYPE;
 		private float outputQuality = ThumbnailParameter.DEFAULT_QUALITY;
-		
+
 		private ScalingMode scalingMode = ScalingMode.PROGRESSIVE_BILINEAR;
 		private AlphaInterpolation alphaInterpolation = AlphaInterpolation.DEFAULT;
 		private Dithering dithering = Dithering.DEFAULT;
 		private Antialiasing antialiasing = Antialiasing.DEFAULT;
 		private Rendering rendering = Rendering.DEFAULT;
-		
+
 		private ResizerFactory resizerFactory = DefaultResizerFactory.getInstance();
-		
+
 		private boolean allowOverwrite = true;
-		
+
 		private boolean fitWithinDimenions = true;
-		
+
 		private boolean useExifOrientation = true;
-		
+
+        private boolean useFrame = false;
+
+        private Color frameColor = Color.WHITE;
+
 		/**
 		 * This field should be set to the {@link Position} to be used for
 		 * cropping if cropping is enabled. If cropping is disabled, then
 		 * this field should be left {@code null}.
 		 */
 		private Position croppingPosition = null;
-		
+
 		/**
 		 * The {@link ImageFilter}s that should be applied when creating the
 		 * thumbnail.
 		 */
 		private Pipeline filterPipeline = new Pipeline();
-		
+
 		/**
 		 * Sets the size of the thumbnail.
 		 * <p>
@@ -872,7 +881,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param width			The width of the thumbnail.
 		 * @param height		The height of the thumbnail.
 		 * @return				Reference to this object.
@@ -881,14 +890,34 @@ Thumbnails.of(image)
 		{
 			updateStatus(Properties.SIZE, Status.ALREADY_SET);
 			updateStatus(Properties.SCALE, Status.CANNOT_SET);
-			
+
 			validateDimensions(width, height);
 			this.width = width;
 			this.height = height;
-			
+
 			return this;
 		}
-		
+
+        public Builder<T> frame(int width, int height)
+        {
+            updateStatus(Properties.SIZE, Status.ALREADY_SET);
+            updateStatus(Properties.SCALE, Status.CANNOT_SET);
+            updateStatus(Properties.USE_FRAME, Status.ALREADY_SET);
+
+            validateDimensions(width, height);
+            this.width = width;
+            this.height = height;
+            this.useFrame = true;
+            return this;
+        }
+
+        public Builder<T> frameColor(Color color) {
+            updateStatus(Properties.FRAME_COLOR, Status.ALREADY_SET);
+
+            this.frameColor = color;
+            return this;
+        }
+
 		/**
 		 * Sets the width of the thumbnail.
 		 * <p>
@@ -902,7 +931,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param width			The width of the thumbnail.
 		 * @return				Reference to this object.
 		 * @since 	0.3.5
@@ -918,13 +947,13 @@ Thumbnails.of(image)
 				updateStatus(Properties.SCALE, Status.CANNOT_SET);
 			}
 			updateStatus(Properties.WIDTH, Status.ALREADY_SET);
-			
+
 			validateDimensions(width, Integer.MAX_VALUE);
 			this.width = width;
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Sets the height of the thumbnail.
 		 * <p>
@@ -938,7 +967,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param height		The height of the thumbnail.
 		 * @return				Reference to this object.
 		 * @since 	0.3.5
@@ -954,13 +983,13 @@ Thumbnails.of(image)
 				updateStatus(Properties.SCALE, Status.CANNOT_SET);
 			}
 			updateStatus(Properties.HEIGHT, Status.ALREADY_SET);
-			
+
 			validateDimensions(Integer.MAX_VALUE, height);
 			this.height = height;
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Sets the size of the thumbnail.
 		 * <p>
@@ -975,7 +1004,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param width			The width of the thumbnail.
 		 * @param height		The height of the thumbnail.
 		 * @return				Reference to this object.
@@ -986,15 +1015,15 @@ Thumbnails.of(image)
 			updateStatus(Properties.SIZE, Status.ALREADY_SET);
 			updateStatus(Properties.KEEP_ASPECT_RATIO, Status.ALREADY_SET);
 			updateStatus(Properties.SCALE, Status.CANNOT_SET);
-			
+
 			validateDimensions(width, height);
 			this.width = width;
 			this.height = height;
 			this.keepAspectRatio = false;
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Sets the scaling factor of the thumbnail.
 		 * <p>
@@ -1013,7 +1042,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param scale			The scaling factor to use when creating a
 		 * 						thumbnail.
 		 * 						<p>
@@ -1026,7 +1055,7 @@ Thumbnails.of(image)
 		{
 			return scale(scale, scale);
 		}
-		
+
 		/**
 		 * Sets the scaling factor for the width and height of the thumbnail.
 		 * <p>
@@ -1050,7 +1079,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param scaleWidth	The scaling factor to use for the width when
 		 * 						creating a thumbnail.
 		 * 						<p>
@@ -1071,7 +1100,7 @@ Thumbnails.of(image)
 			updateStatus(Properties.SCALE, Status.ALREADY_SET);
 			updateStatus(Properties.SIZE, Status.CANNOT_SET);
 			updateStatus(Properties.KEEP_ASPECT_RATIO, Status.CANNOT_SET);
-			
+
 			if (scaleWidth <= 0.0 || scaleHeight <= 0.0)
 			{
 				throw new IllegalArgumentException(
@@ -1090,20 +1119,20 @@ Thumbnails.of(image)
 						"The scaling factor cannot be infinity."
 				);
 			}
-			
+
 			this.scaleWidth = scaleWidth;
 			this.scaleHeight = scaleHeight;
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Specifies the source region from which the thumbnail is to be
 		 * created from.
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param sourceRegion	Source region to use when creating a thumbnail.
 		 * 						<p>
 		 * @return				Reference to this object.
@@ -1117,19 +1146,19 @@ Thumbnails.of(image)
 			{
 				throw new NullPointerException("Region cannot be null.");
 			}
-			
+
 			updateStatus(Properties.SOURCE_REGION, Status.ALREADY_SET);
 			this.sourceRegion = sourceRegion;
 			return this;
 		}
-		
+
 		/**
 		 * Specifies the source region from which the thumbnail is to be
 		 * created from.
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param position		Position of the source region.
 		 * @param size			Size of the source region.
 		 * @return				Reference to this object.
@@ -1147,7 +1176,7 @@ Thumbnails.of(image)
 			{
 				throw new NullPointerException("Size cannot be null.");
 			}
-			
+
 			return sourceRegion(new Region(position, size));
 		}
 
@@ -1157,7 +1186,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param x				The horizontal-compoennt of the top left-hand
 		 * 						corner of the source region.
 		 * @param y				The vertical-compoennt of the top left-hand
@@ -1177,20 +1206,20 @@ Thumbnails.of(image)
 						"Width and height must be greater than 0."
 				);
 			}
-			
+
 			return sourceRegion(
 					new Coordinate(x, y),
 					new AbsoluteSize(width, height)
 			);
 		}
-		
+
 		/**
 		 * Specifies the source region from which the thumbnail is to be
 		 * created from.
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param position		Position of the source region.
 		 * @param width			Width of the source region.
 		 * @param height		Height of the source region.
@@ -1213,20 +1242,20 @@ Thumbnails.of(image)
 						"Width and height must be greater than 0."
 				);
 			}
-			
+
 			return sourceRegion(
 					position,
 					new AbsoluteSize(width, height)
 			);
 		}
-		
+
 		/**
 		 * Specifies the source region from which the thumbnail is to be
 		 * created from.
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param region		A rectangular region which specifies the source
 		 * 						region to use when creating the thumbnail.
 		 * @throws NullPointerException		If the region is {@code null}.
@@ -1238,13 +1267,13 @@ Thumbnails.of(image)
 			{
 				throw new NullPointerException("Region cannot be null.");
 			}
-			
+
 			return sourceRegion(
 					new Coordinate(region.x, region.y),
 					new AbsoluteSize(region.getSize())
 			);
 		}
-		
+
 		/**
 		 * Crops the thumbnail to the size specified when calling the
 		 * {@link #size(int, int)} method, positioned by the given
@@ -1279,7 +1308,7 @@ Thumbnails.of(image)
 		public Builder<T> crop(Position position)
 		{
 			checkForNull(position, "Position cannot be null.");
-			
+
 			updateStatus(Properties.CROP, Status.ALREADY_SET);
 			updateStatus(Properties.SCALE, Status.CANNOT_SET);
 
@@ -1287,7 +1316,7 @@ Thumbnails.of(image)
 			fitWithinDimenions = false;
 			return this;
 		}
-		
+
 		/**
 		 * Specifies whether or not to overwrite files which already exist if
 		 * they have been specified as destination files.
@@ -1306,24 +1335,24 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param allowOverwrite	If {@code true} then existing files will be
 		 * 							overwritten if specified as a destination.
 		 * 							If {@code false}, then the existing files
 		 * 							will not be altered. For specific behavior,
 		 * 							please refer to the specific output methods
 		 * 							listed above.
-		 * 						
+		 *
 		 * @since 	0.3.7
 		 */
 		public Builder<T> allowOverwrite(boolean allowOverwrite)
 		{
 			updateStatus(Properties.ALLOW_OVERWRITE, Status.ALREADY_SET);
 			this.allowOverwrite = allowOverwrite;
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Sets the image type of the thumbnail.
 		 * <p>
@@ -1331,7 +1360,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param type			The image type of the thumbnail.
 		 * @return				Reference to this object.
 		 */
@@ -1349,7 +1378,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param config		The scaling mode to use.
 		 * @return				Reference to this object.
 		 */
@@ -1362,7 +1391,7 @@ Thumbnails.of(image)
 			scalingMode = config;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the resizing operation to use when creating the thumbnail.
 		 * <p>
@@ -1373,7 +1402,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * This method cannot be called in conjunction with the
 		 * {@link #resizerFactory(ResizerFactory)} method.
-		 * 
+		 *
 		 * @param resizer		The scaling operation to use.
 		 * @return				Reference to this object.
 		 */
@@ -1386,7 +1415,7 @@ Thumbnails.of(image)
 			this.resizerFactory = new FixedResizerFactory(resizer);
 			return this;
 		}
-		
+
 		/**
 		 * Sets the {@link ResizerFactory} object to use to decide what kind of
 		 * resizing operation is to be used when creating the thumbnail.
@@ -1398,7 +1427,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * This method cannot be called in conjunction with the
 		 * {@link #resizer(Resizer)} method.
-		 * 
+		 *
 		 * @param resizerFactory		The scaling operation to use.
 		 * @return						Reference to this object.
 		 * @since	0.4.0
@@ -1408,18 +1437,18 @@ Thumbnails.of(image)
 			checkForNull(resizerFactory, "ResizerFactory is null.");
 			updateStatus(Properties.RESIZER_FACTORY, Status.ALREADY_SET);
 			updateStatus(Properties.RESIZER, Status.CANNOT_SET);
-			
+
 			// disable the methods which set parameters for the Resizer
 			updateStatus(Properties.SCALING_MODE, Status.CANNOT_SET);
 			updateStatus(Properties.ALPHA_INTERPOLATION, Status.CANNOT_SET);
 			updateStatus(Properties.DITHERING, Status.CANNOT_SET);
 			updateStatus(Properties.ANTIALIASING, Status.CANNOT_SET);
 			updateStatus(Properties.RENDERING, Status.CANNOT_SET);
-			
+
 			this.resizerFactory = resizerFactory;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the alpha interpolation mode when performing the resizing
 		 * operation to generate the thumbnail.
@@ -1431,7 +1460,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * This method cannot be called in conjunction with the
 		 * {@link #resizerFactory(ResizerFactory)} method.
-		 * 
+		 *
 		 * @param config		The alpha interpolation mode.
 		 * @return				Reference to this object.
 		 */
@@ -1455,7 +1484,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * This method cannot be called in conjunction with the
 		 * {@link #resizerFactory(ResizerFactory)} method.
-		 * 
+		 *
 		 * @param config		The dithering mode.
 		 * @return				Reference to this object.
 		 */
@@ -1467,7 +1496,7 @@ Thumbnails.of(image)
 			dithering = config;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the antialiasing mode when performing the resizing
 		 * operation to generate the thumbnail.
@@ -1479,7 +1508,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * This method cannot be called in conjunction with the
 		 * {@link #resizerFactory(ResizerFactory)} method.
-		 * 
+		 *
 		 * @param config		The antialiasing mode.
 		 * @return				Reference to this object.
 		 */
@@ -1491,7 +1520,7 @@ Thumbnails.of(image)
 			antialiasing = config;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the rendering mode when performing the resizing
 		 * operation to generate the thumbnail.
@@ -1503,7 +1532,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * This method cannot be called in conjunction with the
 		 * {@link #resizerFactory(ResizerFactory)} method.
-		 * 
+		 *
 		 * @param config		The rendering mode.
 		 * @return				Reference to this object.
 		 */
@@ -1515,7 +1544,7 @@ Thumbnails.of(image)
 			rendering = config;
 			return this;
 		}
-		
+
 		/**
 		 * Sets whether or not to keep the aspect ratio of the original image
 		 * for the thumbnail.
@@ -1529,12 +1558,12 @@ Thumbnails.of(image)
 		 * Calling this method after calling the {@link #scale(double)} method
 		 * or the {@link #scale(double, double)} method will result in a
 		 * {@link IllegalStateException}.
-		 * 
+		 *
 		 * @param keep			{@code true} if the thumbnail is to maintain
 		 * 						the aspect ratio of the original image,
 		 * 						{@code false} otherwise.
 		 * @return				Reference to this object.
-		 * 
+		 *
 		 * @throws IllegalStateException	If
 		 * 									<ol>
 		 * 									<li>the {@link #size(int, int)} has
@@ -1574,12 +1603,12 @@ Thumbnails.of(image)
 						"preserved when the width and/or height parameter " +
 						"has already been specified.");
 			}
-			
+
 			updateStatus(Properties.KEEP_ASPECT_RATIO, Status.ALREADY_SET);
 			keepAspectRatio = keep;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the output quality of the compression algorithm used to
 		 * compress the thumbnail when it is written to an external destination
@@ -1599,7 +1628,7 @@ Thumbnails.of(image)
 		 * Calling this method multiple times, or the
 		 * {@link #outputQuality(double)} in conjunction with this method will
 		 * result in an {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param quality		The compression quality to use when writing
 		 * 						the thumbnail.
 		 * @return				Reference to this object.
@@ -1620,7 +1649,7 @@ Thumbnails.of(image)
 			outputQuality = quality;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the output quality of the compression algorithm used to
 		 * compress the thumbnail when it is written to an external destination
@@ -1644,7 +1673,7 @@ Thumbnails.of(image)
 		 * Calling this method multiple times, or the
 		 * {@link #outputQuality(float)} in conjunction with this method will
 		 * result in an {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param quality		The compression quality to use when writing
 		 * 						the thumbnail.
 		 * @return				Reference to this object.
@@ -1661,7 +1690,7 @@ Thumbnails.of(image)
 						"1.0d, inclusive."
 				);
 			}
-			
+
 			updateStatus(Properties.OUTPUT_QUALITY, Status.ALREADY_SET);
 			outputQuality = (float)quality;
 			if (outputQuality < 0.0f)
@@ -1674,7 +1703,7 @@ Thumbnails.of(image)
 			}
 			return this;
 		}
-		
+
 		/**
 		 * Sets the compression format to use when writing the thumbnail.
 		 * <p>
@@ -1708,7 +1737,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param format		The compression format to use when writing
 		 * 						the thumbnail.
 		 * @return				Reference to this object.
@@ -1723,19 +1752,19 @@ Thumbnails.of(image)
 						"Specified format is not supported: " + format
 				);
 			}
-			
+
 			updateStatus(Properties.OUTPUT_FORMAT, Status.ALREADY_SET);
 			outputFormat = format;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the compression format to use the same format as the original
 		 * image.
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @return				Reference to this object.
 		 * @since	0.4.0
 		 */
@@ -1745,14 +1774,14 @@ Thumbnails.of(image)
 			outputFormat = ThumbnailParameter.ORIGINAL_FORMAT;
 			return this;
 		}
-		
+
 		/**
 		 * Sets whether or not to use the Exif metadata when orienting the
 		 * thumbnail.
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @param useExifOrientation	{@code true} if the Exif metadata
 		 * 								should be used to determine the
 		 * 								orientation of the thumbnail,
@@ -1766,7 +1795,7 @@ Thumbnails.of(image)
 			this.useExifOrientation = useExifOrientation;
 			return this;
 		}
-		
+
 		/**
 		 * Indicates that the output format should be determined from the
 		 * available information when writing the thumbnail image.
@@ -1777,7 +1806,7 @@ Thumbnails.of(image)
 		 * <p>
 		 * Calling this method multiple times will result in an
 		 * {@link IllegalStateException} to be thrown.
-		 * 
+		 *
 		 * @return				Reference to this object.
 		 * @since	0.4.0
 		 */
@@ -1787,12 +1816,12 @@ Thumbnails.of(image)
 			outputFormat = ThumbnailParameter.DETERMINE_FORMAT;
 			return this;
 		}
-		
+
 		private boolean isOutputFormatNotSet()
 		{
 			return outputFormat == null || ThumbnailParameter.DETERMINE_FORMAT.equals(outputFormat);
 		}
-		
+
 		/**
 		 * Sets the compression format type of the thumbnail to write.
 		 * <p>
@@ -1835,7 +1864,7 @@ Thumbnails.of(image)
 						"format has not been specified."
 				);
 			}
-			
+
 			if (!ThumbnailatorUtils.isSupportedOutputFormatType(outputFormat, formatType))
 			{
 				throw new IllegalArgumentException(
@@ -1843,14 +1872,14 @@ Thumbnails.of(image)
 						" supported for the format: " + outputFormat
 				);
 			}
-			
+
 			/*
 			 * If the output format type is set, then we'd better make the
 			 * output format unchangeable, or else we'd risk having a type
 			 * that is not part of the output format.
 			 */
 			updateStatus(Properties.OUTPUT_FORMAT_TYPE, Status.ALREADY_SET);
-			
+
 			if (!statusMap.containsKey(Properties.OUTPUT_FORMAT))
 			{
 				updateStatus(Properties.OUTPUT_FORMAT, Status.CANNOT_SET);
@@ -1858,7 +1887,7 @@ Thumbnails.of(image)
 			outputFormatType = formatType;
 			return this;
 		}
-		
+
 		/**
 		 * Sets the watermark to apply on the thumbnail.
 		 * <p>
@@ -1869,7 +1898,7 @@ Thumbnails.of(image)
 		 * applied in the order that this method is called.
 		 * <p>
 		 * Calling this method to set this parameter is optional.
-		 * 
+		 *
 		 * @param w				The watermark to apply to the thumbnail.
 		 * @return				Reference to this object.
 		 */
@@ -1879,12 +1908,12 @@ Thumbnails.of(image)
 			{
 				throw new NullPointerException("Watermark is null.");
 			}
-			
+
 			filterPipeline.add(w);
-			
+
 			return this;
 		}
-		
+
 		/**
 		 * Sets the image of the watermark to apply on the thumbnail.
 		 * <p>
@@ -1903,7 +1932,7 @@ watermark(Positions.CENTER, image, 0.5f);
 		 * applied in the order that this method is called.
 		 * <p>
 		 * Calling this method to set this parameter is optional.
-		 * 
+		 *
 		 * @param image			The image of the watermark.
 		 * @return				Reference to this object.
 		 */
@@ -1911,7 +1940,7 @@ watermark(Positions.CENTER, image, 0.5f);
 		{
 			return watermark(Positions.CENTER, image, 0.5f);
 		}
-		
+
 		/**
 		 * Sets the image and opacity of the watermark to apply on
 		 * the thumbnail.
@@ -1930,7 +1959,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * applied in the order that this method is called.
 		 * <p>
 		 * Calling this method to set this parameter is optional.
-		 * 
+		 *
 		 * @param image			The image of the watermark.
 		 * @param opacity		The opacity of the watermark.
 		 * 						<p>
@@ -1944,7 +1973,7 @@ watermark(Positions.CENTER, image, opacity);
 		{
 			return watermark(Positions.CENTER, image, opacity);
 		}
-		
+
 		/**
 		 * Sets the image and opacity and position of the watermark to apply on
 		 * the thumbnail.
@@ -1956,7 +1985,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * applied in the order that this method is called.
 		 * <p>
 		 * Calling this method to set this parameter is optional.
-		 * 
+		 *
 		 * @param position		The position of the watermark.
 		 * @param image			The image of the watermark.
 		 * @param opacity		The opacity of the watermark.
@@ -1972,11 +2001,11 @@ watermark(Positions.CENTER, image, opacity);
 			filterPipeline.add(new Watermark(position, image, opacity));
 			return this;
 		}
-		
+
 		/*
 		 * rotation
 		 */
-		
+
 		/**
 		 * Sets the amount of rotation to apply to the thumbnail.
 		 * <p>
@@ -1999,11 +2028,11 @@ watermark(Positions.CENTER, image, opacity);
 			return this;
 		}
 
-		
+
 		/*
 		 * other filters
 		 */
-		
+
 		/**
 		 * Adds a {@link ImageFilter} to apply to the thumbnail.
 		 * <p>
@@ -2014,7 +2043,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * applied in the order that this method is called.
 		 * <p>
 		 * Calling this method to set this parameter is optional.
-		 * 
+		 *
 		 * @param filter		An image filter to apply to the thumbnail.
 		 * @return				Reference to this object.
 		 */
@@ -2024,11 +2053,11 @@ watermark(Positions.CENTER, image, opacity);
 			{
 				throw new NullPointerException("Filter is null.");
 			}
-			
+
 			filterPipeline.add(filter);
 			return this;
 		}
-		
+
 		/**
 		 * Adds multiple {@link ImageFilter}s to apply to the thumbnail.
 		 * <p>
@@ -2039,7 +2068,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * applied in the order that this method is called.
 		 * <p>
 		 * Calling this method to set this parameter is optional.
-		 * 
+		 *
 		 * @param filters		A list of filters to apply to the thumbnail.
 		 * @return				Reference to this object.
 		 */
@@ -2049,14 +2078,14 @@ watermark(Positions.CENTER, image, opacity);
 			{
 				throw new NullPointerException("Filters is null.");
 			}
-			
+
 			filterPipeline.addAll(filters);
 			return this;
 		}
-		
+
 		/**
 		 * Checks whether the builder is ready to create thumbnails.
-		 * 
+		 *
 		 * @throws IllegalStateException	If the builder is not ready to
 		 * 									create thumbnails, due to some
 		 * 									parameters not being set.
@@ -2071,11 +2100,11 @@ watermark(Positions.CENTER, image, opacity);
 				}
 			}
 		}
-		
+
 		/**
 		 * Returns a {@link Resizer} which is suitable for the current
 		 * builder state.
-		 * 
+		 *
 		 * @param mode		The scaling mode to use to create thumbnails.
 		 * @return			The {@link Resizer} which is suitable for the
 		 * 					specified scaling mode and builder state.
@@ -2084,12 +2113,12 @@ watermark(Positions.CENTER, image, opacity);
 		{
 			Map<RenderingHints.Key, Object> hints =
 				new HashMap<RenderingHints.Key, Object>();
-			
+
 			hints.put(RenderingHints.KEY_ALPHA_INTERPOLATION, alphaInterpolation.getValue());
 			hints.put(RenderingHints.KEY_DITHERING, dithering.getValue());
 			hints.put(RenderingHints.KEY_ANTIALIASING, antialiasing.getValue());
 			hints.put(RenderingHints.KEY_RENDERING, rendering.getValue());
-			
+
 			if (mode == ScalingMode.BILINEAR)
 			{
 				return new BilinearResizer(hints);
@@ -2123,14 +2152,14 @@ watermark(Positions.CENTER, image, opacity);
 
 		/**
 		 * Returns a {@link ThumbnailParameter} from the current builder state.
-		 * 
+		 *
 		 * @return			A {@link ThumbnailParameter} from the current
 		 * 					builder state.
 		 */
 		private ThumbnailParameter makeParam()
 		{
 			prepareResizerFactory();
-			
+
 			int imageTypeToUse = imageType;
 			if (imageType == IMAGE_TYPE_UNSPECIFIED)
 			{
@@ -2145,11 +2174,11 @@ watermark(Positions.CENTER, image, opacity);
 			{
 				filterPipeline.addFirst(new Canvas(width, height, croppingPosition));
 			}
-			
+
 			if (Double.isNaN(scaleWidth))
 			{
 				// If the dimensions were specified, do the following.
-				
+
 				// Check that at least one dimension is specified.
 				// If it's not, it's a bug.
 				if (
@@ -2163,7 +2192,7 @@ watermark(Positions.CENTER, image, opacity);
 							"Thumbnailator library."
 					);
 				}
-				
+
 				// Set the unspecified dimension to a default value.
 				if (width == DIMENSION_NOT_SPECIFIED)
 				{
@@ -2173,7 +2202,7 @@ watermark(Positions.CENTER, image, opacity);
 				{
 					height = Integer.MAX_VALUE;
 				}
-				
+
 				return new ThumbnailParameter(
 						new Dimension(width, height),
 						sourceRegion,
@@ -2185,7 +2214,9 @@ watermark(Positions.CENTER, image, opacity);
 						filterPipeline.getFilters(),
 						resizerFactory,
 						fitWithinDimenions,
-						useExifOrientation
+						useExifOrientation,
+                        useFrame,
+                        frameColor
 				);
 			}
 			else
@@ -2203,7 +2234,9 @@ watermark(Positions.CENTER, image, opacity);
 						filterPipeline.getFilters(),
 						resizerFactory,
 						fitWithinDimenions,
-						useExifOrientation
+						useExifOrientation,
+                        useFrame,
+                        frameColor
 				);
 			}
 		}
@@ -2223,7 +2256,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * If an {@link IOException} occurs during the processing of the
 		 * thumbnail, the {@link Iterable} will return a {@code null} for that
 		 * element.
-		 * 
+		 *
 		 * @return		An {@link Iterable} which will provide an
 		 * 				{@link Iterator} which returns thumbnails as
 		 * 				{@link BufferedImage}s.
@@ -2237,7 +2270,7 @@ watermark(Positions.CENTER, image, opacity);
 			 */
 			return new BufferedImageIterable();
 		}
-		
+
 		/**
 		 * Create the thumbnails and return as a {@link List} of
 		 * {@link BufferedImage}s.
@@ -2249,7 +2282,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * If many thumbnails are being processed at once, then using the
 		 * {@link #iterableBufferedImages()} method would be preferable.
-		 * 
+		 *
 		 * @return		A list of thumbnails.
 		 * @throws IOException					If an problem occurred during
 		 * 										the reading of the original
@@ -2258,30 +2291,30 @@ watermark(Positions.CENTER, image, opacity);
 		public List<BufferedImage> asBufferedImages() throws IOException
 		{
 			checkReadiness();
-			
+
 			List<BufferedImage> thumbnails = new ArrayList<BufferedImage>();
-			
+
 			// Create thumbnails
 			for (ImageSource<T> source : sources)
 			{
 				BufferedImageSink destination = new BufferedImageSink();
-				
+
 				Thumbnailator.createThumbnail(
 					new SourceSinkThumbnailTask<T, BufferedImage>(makeParam(), source, destination)
 				);
-				
+
 				thumbnails.add(destination.getSink());
 			}
-			
+
 			return thumbnails;
 		}
-		
+
 		/**
 		 * Creates a thumbnail and returns it as a {@link BufferedImage}.
 		 * <p>
 		 * To call this method, the thumbnail must have been created from a
 		 * single source.
-		 * 
+		 *
 		 * @return		A thumbnail as a {@link BufferedImage}.
 		 * @throws IOException					If an problem occurred during
 		 * 										the reading of the original
@@ -2292,24 +2325,24 @@ watermark(Positions.CENTER, image, opacity);
 		public BufferedImage asBufferedImage() throws IOException
 		{
 			checkReadiness();
-			
+
 			Iterator<ImageSource<T>> iter = sources.iterator();
 			ImageSource<T> source = iter.next();
-			
+
 			if (iter.hasNext())
 			{
 				throw new IllegalArgumentException("Cannot create one thumbnail from multiple original images.");
 			}
-			
+
 			BufferedImageSink destination = new BufferedImageSink();
-			
+
 			Thumbnailator.createThumbnail(
 				new SourceSinkThumbnailTask<T, BufferedImage>(makeParam(), source, destination)
 			);
-				
+
 			return destination.getSink();
 		}
-		
+
 		/**
 		 * Creates the thumbnails and stores them to the files, and returns
 		 * a {@link List} of {@link File}s to the thumbnails.
@@ -2323,7 +2356,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * The file names for the thumbnails are obtained from the given
 		 * {@link Iterable}.
-		 * 
+		 *
 		 * @param iterable			An {@link Iterable} which returns an
 		 * 							{@link Iterator} which returns file names
 		 * 							which should be assigned to each thumbnail.
@@ -2337,16 +2370,16 @@ watermark(Positions.CENTER, image, opacity);
 		public List<File> asFiles(Iterable<File> iterable) throws IOException
 		{
 			checkReadiness();
-			
+
 			if (iterable == null)
 			{
 				throw new NullPointerException("File name iterable is null.");
 			}
-			
+
 			List<File> destinationFiles = new ArrayList<File>();
-			
+
 			Iterator<File> filenameIter = iterable.iterator();
-			
+
 			for (ImageSource<T> source : sources)
 			{
 				if (!filenameIter.hasNext())
@@ -2355,17 +2388,17 @@ watermark(Positions.CENTER, image, opacity);
 							"Not enough file names provided by iterator."
 					);
 				}
-				
+
 				ThumbnailParameter param = makeParam();
-				
+
 				FileImageSink destination = new FileImageSink(filenameIter.next(), allowOverwrite);
-				
+
 				try
 				{
 					Thumbnailator.createThumbnail(
 							new SourceSinkThumbnailTask<T, File>(param, source, destination)
 					);
-					
+
 					destinationFiles.add(destination.getSink());
 				}
 				catch (IllegalArgumentException e)
@@ -2377,10 +2410,10 @@ watermark(Positions.CENTER, image, opacity);
 					 */
 				}
 			}
-			
+
 			return destinationFiles;
 		}
-		
+
 		/**
 		 * Creates the thumbnails and stores them to the files.
 		 * <p>
@@ -2391,7 +2424,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * The file names for the thumbnails are obtained from the given
 		 * {@link Iterable}.
-		 * 
+		 *
 		 * @param iterable			An {@link Iterable} which returns an
 		 * 							{@link Iterator} which returns file names
 		 * 							which should be assigned to each thumbnail.
@@ -2404,7 +2437,7 @@ watermark(Positions.CENTER, image, opacity);
 		{
 			asFiles(iterable);
 		}
-		
+
 		/**
 		 * Creates thumbnails and stores them to files using the
 		 * {@link Rename} function to determine the filenames. The thubnail
@@ -2419,7 +2452,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * To call this method, the thumbnails must have been creates from
 		 * files by calling the {@link Thumbnails#of(File...)} method.
-		 * 
+		 *
 		 * @param rename			The rename function which is used to
 		 * 							determine the filenames of the thumbnail
 		 * 							files to write.
@@ -2436,7 +2469,7 @@ watermark(Positions.CENTER, image, opacity);
 		{
 			return asFiles(null, rename);
 		}
-		
+
 		/**
 		 * Creates thumbnails and stores them to files in the directory
 		 * specified by the given {@link File} object, and using the
@@ -2479,42 +2512,42 @@ watermark(Positions.CENTER, image, opacity);
 		public List<File> asFiles(File destinationDir, Rename rename) throws IOException
 		{
 			checkReadiness();
-			
+
 			if (rename == null)
 			{
 				throw new NullPointerException("Rename is null.");
 			}
-			
+
 			if (destinationDir != null && !destinationDir.isDirectory())
 			{
 				throw new IllegalArgumentException("Given destination is not a directory.");
 			}
 
 			List<File> destinationFiles = new ArrayList<File>();
-			
+
 			for (ImageSource<T> source : sources)
 			{
 				if (!(source instanceof FileImageSource))
 				{
 					throw new IllegalStateException("Cannot create thumbnails to files if original images are not from files.");
 				}
-				
+
 				ThumbnailParameter param = makeParam();
-				
+
 				File f = ((FileImageSource)source).getSource();
-				
+
 				File actualDestDir = destinationDir == null ? f.getParentFile() : destinationDir;
 				File destinationFile =
 					new File(actualDestDir, rename.apply(f.getName(), param));
-				
+
 				FileImageSink destination = new FileImageSink(destinationFile, allowOverwrite);
-				
+
 				try
 				{
 					Thumbnailator.createThumbnail(
 							new SourceSinkThumbnailTask<T, File>(param, source, destination)
 					);
-					
+
 					destinationFiles.add(destination.getSink());
 				}
 				catch (IllegalArgumentException e)
@@ -2526,7 +2559,7 @@ watermark(Positions.CENTER, image, opacity);
 					 */
 				}
 			}
-			
+
 			return destinationFiles;
 		}
 
@@ -2541,7 +2574,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * To call this method, the thumbnails must have been creates from
 		 * files by calling the {@link Thumbnails#of(File...)} method.
-		 * 
+		 *
 		 * @param rename			The rename function which is used to
 		 * 							determine the filenames of the thumbnail
 		 * 							files to write.
@@ -2557,7 +2590,7 @@ watermark(Positions.CENTER, image, opacity);
 		{
 			toFiles(null, rename);
 		}
-		
+
 		/**
 		 * Creates thumbnails and stores them to files in the directory
 		 * specified by the given {@link File} object, and using the
@@ -2577,7 +2610,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * To call this method, the thumbnails must have been creates from
 		 * files by calling the {@link Thumbnails#of(File...)} method.
-		 * 
+		 *
 		 * @param destinationDir	The destination directory to which the
 		 * 							thumbnails should be written to.
 		 * @param rename			The rename function which is used to
@@ -2608,7 +2641,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * To call this method, the thumbnail must have been created from a
 		 * single source.
-		 * 
+		 *
 		 * @param outFile			The file to which the thumbnail is to be
 		 * 							written to.
 		 * @throws IOException		If a problem occurs while reading the
@@ -2622,22 +2655,22 @@ watermark(Positions.CENTER, image, opacity);
 		public void toFile(File outFile) throws IOException
 		{
 			checkReadiness();
-			
+
 			Iterator<ImageSource<T>> iter = sources.iterator();
 			ImageSource<T> source = iter.next();
-			
+
 			if (iter.hasNext())
 			{
 				throw new IllegalArgumentException("Cannot output multiple thumbnails to one file.");
 			}
-			
+
 			FileImageSink destination = new FileImageSink(outFile, allowOverwrite);
-			
+
 			Thumbnailator.createThumbnail(
 					new SourceSinkThumbnailTask<T, File>(makeParam(), source, destination)
 			);
 		}
-		
+
 		/**
 		 * Create a thumbnail and writes it to a {@link File}.
 		 * <p>
@@ -2648,7 +2681,7 @@ watermark(Positions.CENTER, image, opacity);
 		 * <p>
 		 * To call this method, the thumbnail must have been created from a
 		 * single source.
-		 * 
+		 *
 		 * @param outFilepath		The file to which the thumbnail is to be
 		 * 							written to.
 		 * @throws IOException		If a problem occurs while reading the
@@ -2662,28 +2695,28 @@ watermark(Positions.CENTER, image, opacity);
 		public void toFile(String outFilepath) throws IOException
 		{
 			checkReadiness();
-			
+
 			Iterator<ImageSource<T>> iter = sources.iterator();
 			ImageSource<T> source = iter.next();
-			
+
 			if (iter.hasNext())
 			{
 				throw new IllegalArgumentException("Cannot output multiple thumbnails to one file.");
 			}
-			
+
 			FileImageSink destination = new FileImageSink(outFilepath, allowOverwrite);
-			
+
 			Thumbnailator.createThumbnail(
 					new SourceSinkThumbnailTask<T, File>(makeParam(), source, destination)
 			);
 		}
-		
+
 		/**
 		 * Create a thumbnail and writes it to a {@link OutputStream}.
 		 * <p>
 		 * To call this method, the thumbnail must have been created from a
 		 * single source.
-		 * 
+		 *
 		 * @param os				The output stream to which the thumbnail
 		 * 							is to be written to.
 		 * @throws IOException		If a problem occurs while reading the
@@ -2698,15 +2731,15 @@ watermark(Positions.CENTER, image, opacity);
 		public void toOutputStream(OutputStream os) throws IOException
 		{
 			checkReadiness();
-			
+
 			Iterator<ImageSource<T>> iter = sources.iterator();
 			ImageSource<T> source = iter.next();
-			
+
 			if (iter.hasNext())
 			{
 				throw new IllegalArgumentException("Cannot output multiple thumbnails to a single OutputStream.");
 			}
-			
+
 			/*
 			 * if the image is from a BufferedImage, then we require that the
 			 * output format be set. (or else, we can't tell what format to
@@ -2721,18 +2754,18 @@ watermark(Positions.CENTER, image, opacity);
 					);
 				}
 			}
-			
+
 			OutputStreamImageSink destination = new OutputStreamImageSink(os);
-			
+
 			Thumbnailator.createThumbnail(
 					new SourceSinkThumbnailTask<T, OutputStream>(makeParam(), source, destination)
 			);
 		}
-		
+
 		/**
 		 * Creates the thumbnails and writes them to {@link OutputStream}s
 		 * provided by the {@link Iterable}.
-		 * 
+		 *
 		 * @param iterable			An {@link Iterable} which returns an
 		 * 							{@link Iterator} which returns the
 		 * 							output stream which should be assigned to
@@ -2747,14 +2780,14 @@ watermark(Positions.CENTER, image, opacity);
 		public void toOutputStreams(Iterable<? extends OutputStream> iterable) throws IOException
 		{
 			checkReadiness();
-			
+
 			if (iterable == null)
 			{
 				throw new NullPointerException("OutputStream iterable is null.");
 			}
-			
+
 			Iterator<? extends OutputStream> osIter = iterable.iterator();
-			
+
 			for (ImageSource<T> source : sources)
 			{
 				/*
@@ -2771,16 +2804,16 @@ watermark(Positions.CENTER, image, opacity);
 						);
 					}
 				}
-				
+
 				if (!osIter.hasNext())
 				{
 					throw new IndexOutOfBoundsException(
 							"Not enough file names provided by iterator."
 					);
 				}
-				
+
 				OutputStreamImageSink destination = new OutputStreamImageSink(osIter.next());
-				
+
 				Thumbnailator.createThumbnail(
 						new SourceSinkThumbnailTask<T, OutputStream>(makeParam(), source, destination)
 				);

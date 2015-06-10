@@ -1,20 +1,21 @@
 package net.coobird.thumbnailator.tasks;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import net.coobird.thumbnailator.ThumbnailParameter;
+import net.coobird.thumbnailator.resizers.Resizers;
+import org.junit.Ignore;
+import org.junit.Test;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.coobird.thumbnailator.ThumbnailParameter;
-import net.coobird.thumbnailator.resizers.Resizers;
-
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class FileThumbnailTaskTest
 {
@@ -26,7 +27,7 @@ public class FileThumbnailTaskTest
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		try
 		{
 			// when
@@ -40,7 +41,7 @@ public class FileThumbnailTaskTest
 			throw e;
 		}
 	}
-	
+
 	@Test
 	public void testRead_CorrectUsage() throws IOException
 	{
@@ -55,16 +56,18 @@ public class FileThumbnailTaskTest
 				null,
 				Resizers.PROGRESSIVE,
 				true,
-				true
+				true,
+                false,
+                Color.WHITE
 		);
-		
+
 		File inputFile = new File("src/test/resources/Thumbnailator/grid.jpg");
 		File outputFile = File.createTempFile("thumbnailator-testing-", ".png");
 		outputFile.deleteOnExit();
-		
+
 		FileThumbnailTask task =
 			new FileThumbnailTask(param, inputFile, outputFile);
-		
+
 		task.read();
 	}
 
@@ -94,14 +97,16 @@ public class FileThumbnailTaskTest
 				null,
 				Resizers.PROGRESSIVE,
 				true,
-				true
+				true,
+                false,
+                Color.WHITE
 		);
-		
+
 		InputStream is = mock(InputStream.class);
 		OutputStream os = mock(OutputStream.class);
-		
+
 		StreamThumbnailTask task = new StreamThumbnailTask(param, is, os);
-		
+
 		assertEquals(param, task.getParam());
 
 		verifyZeroInteractions(is);
