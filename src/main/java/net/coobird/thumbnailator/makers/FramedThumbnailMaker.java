@@ -57,19 +57,16 @@ public final class FramedThumbnailMaker extends FixedSizeThumbnailMaker {
 
     @Override
     public BufferedImage make(BufferedImage img) {
-        int dim = Math.max(img.getWidth(), img.getHeight());
-
-        BufferedImage framedImage = new BufferedImageBuilder(dim, dim, img.getType()).build();
-
-        //TODO parametrize color
+        BufferedImage framedImage = new BufferedImageBuilder(width, height, img.getType()).build();
         Graphics2D g = framedImage.createGraphics();
         g.setColor(frameColor);
-        g.fillRect(0, 0, dim, dim);
+        g.fillRect(0, 0, width, height);
+        g.dispose();
 
+        img = super.make(img);
         Watermark wm = new Watermark(Positions.CENTER, img, 1.0f);
-
         framedImage = wm.apply(framedImage);
 
-        return super.make(framedImage);
+        return framedImage;
     }
 }
