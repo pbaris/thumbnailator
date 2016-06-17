@@ -7,6 +7,8 @@ import net.coobird.thumbnailator.geometry.Positions;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
+
 /**
  * Created on 10/6/2015.
  *
@@ -57,7 +59,7 @@ public final class FramedThumbnailMaker extends FixedSizeThumbnailMaker {
 
     @Override
     public BufferedImage make(BufferedImage img) {
-        BufferedImage framedImage = new BufferedImageBuilder(width, height, img.getType()).build();
+        BufferedImage framedImage = new BufferedImageBuilder(width, height, TYPE_INT_ARGB).build();
         Graphics2D g = framedImage.createGraphics();
         g.setColor(frameColor);
         g.fillRect(0, 0, width, height);
