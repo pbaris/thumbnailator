@@ -27,7 +27,7 @@ public class AbsoluteSize implements Size
 	{
 		if (size == null)
 		{
-			throw new NullPointerException("Size cannot be null.");
+			throw new NullPointerException("Size cannot be null. ");
 		}
 		this.size = new Dimension(size);
 	}
